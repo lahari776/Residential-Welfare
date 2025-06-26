@@ -1444,5 +1444,7 @@ app.get("/", (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on:
     - Local: http://localhost:${PORT}
-    - Network: http://${localIp}:${PORT}`);
+    - Network: http://${localIp}:${PORT}
+    . 
+    -> Ahoy! Cruise control on!  🚀`);
 });
