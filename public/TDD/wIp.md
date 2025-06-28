@@ -48,7 +48,9 @@ The access URLs:
 
 App: UI http://its-rwams.ddev.site:5050/
 
-phpMyAdmin UI: http://its-rwams.ddev.site:8036/
+To double check the URLs and port, it's better to run "ddev describe" once in a while.
+
+phpMyAdmin UI: http://its-rwams.ddev.site:8037/
 
 Mailpit: https://its-rwams.ddev.site:8026/
 
