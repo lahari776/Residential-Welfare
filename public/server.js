@@ -10,7 +10,8 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.static(__dirname));
+//app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(bodyParser.json());
 
@@ -1437,12 +1438,13 @@ const localIp = getLocalIp();
 
 // Serve frontend
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "b4log.html"));
+  console.log("Serving landing page from:", path.join(__dirname, "html/b4log.html"));
+  res.sendFile(path.join(__dirname, "html/b4log.html"));
 });
 
 // Start the server
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`🚀 Server running on:
+    console.log(`🚀 Server running from root on:
     - Local: http://localhost:${PORT}
     - Network: http://${localIp}:${PORT}
     . 

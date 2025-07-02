@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get current user from local storage
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (!currentUser) {
-        window.location.href = 'login.html';
+        window.location.href = 'public/html/login.html';
         return;
     }
 

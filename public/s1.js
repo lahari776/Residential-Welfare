@@ -8,7 +8,8 @@ const os = require("os");
 const app = express();
 
 app.use(cors());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, "public")));
+//app.use(express.static(__dirname));
 app.use(express.json());
 const nodemailer = require('nodemailer');
 
@@ -1285,7 +1286,7 @@ const localIp = getLocalIp();
 
 // ✅ Serve b4login.html on root
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "b4log.html"));
+    res.sendFile(path.join(__dirname, "html/b4log.html"));
 });
 
 // Start server

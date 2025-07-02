@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Residential Welfare - Community Services and Information">
+    <title>Residential Welfare</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #556b2f;
+            --primary-hover: #6b8e23;
+            --text-color: #ffffff;
+            --bg-overlay: rgba(0, 0, 0, 0.8);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Merriweather', serif;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('pic1.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            line-height: 1.6;
+        }
+
+        /* Navigation Styles */
+        .nav-container {
+            background-color: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            transition: color 0.3s ease;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-hover);
+        }
+
+        .nav-icon {
+            font-size: 18px;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: var(--bg-overlay);
+            min-width: 200px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: var(--text-color);
+            padding: 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--primary-color);
+        }
+
+        /* Dashboard Cards */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+
+        .dashboard-card {
+            background-color: var(--bg-overlay);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dashboard-card-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-card-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-card-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 120px 20px 40px;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Data loading */
+        .loading {
+            opacity: 0.7;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 3rem 2rem;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section {
+            padding: 0 1rem;
+        }
+
+        .footer-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .footer-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 50px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-link {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-link a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color var(--transition-speed) ease;
+            display: inline-block;
+        }
+
+        .footer-link a:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+                margin-top: 1rem;
+                text-align: center;
+            }
+
+            .dropdown-content {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                margin-top: 0.5rem;
+            }
+
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-title::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div class="nav-container">
+        <nav class="navbar">
+            <a href="#" class="nav-logo">Residential Welfare</a>
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="notifications.html" class="nav-link">
+                        <i class="fas fa-bell nav-icon"></i> Notifications
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="adminpaymentmanage.html" class="nav-link">
+                        <i class="fas fa-money-bill-wave nav-icon"></i> Payments
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="community-forum.html" class="nav-link">
+                        <i class="fas fa-users nav-icon"></i> Community Forum
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="acomplaint.html" class="nav-link">
+                        <i class="fas fa-money-bill-wave nav-icon"></i> Complaint Management
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-user nav-icon"></i> Profile
+                    </a>
+                    <div class="dropdown-content">
+                        <a href="p3.html">
+                            <i class="fas fa-id-card"></i> View Profile
+                        </a>
+                        <a href="#" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a href="admin-users.html" class="nav-link">
+                        <i class="fas fa-user-cog nav-icon"></i> Manage Users
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="welcome-section">
+            <h1 class="welcome-title">Welcome to Residential Welfare</h1>
+            <p class="welcome-subtitle">Your one-stop platform for community management, payments, and staying connected with your neighbors.</p>
+        </section>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-container">
+            <div class="dashboard-card">
+                <i class="fas fa-users dashboard-card-icon"></i>
+                <h3 class="dashboard-card-title">Total Residents</h3>
+                <p class="dashboard-card-value" id="total-residents">--</p>
+                <p class="dashboard-card-description">Active community members</p>
+            </div>
+            <div class="dashboard-card">
+                <i class="fas fa-exclamation-circle dashboard-card-icon"></i>
+                <h3 class="dashboard-card-title">Pending Payments</h3>
+                <p class="dashboard-card-value" id="pending-payments">--</p>
+                <p class="dashboard-card-description">Requiring attention</p>
+            </div>
+            
+            <div class="dashboard-card">
+                <i class="fas fa-comment-alt dashboard-card-icon"></i>
+                <h3 class="dashboard-card-title">New Posts</h3>
+                <p class="dashboard-card-value" id="total-posts">--</p>
+                <p class="dashboard-card-description">Community discussions</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">Contact Us</h3>
+                <p>Email: info@residential.com</p>
+                <p>Phone: (555) 123-4567</p>
+                <p>Address: 123 Residential Ave, City, State 12345</p>
+            </div>
+            <div class="footer-section">
+                <h3 class="footer-title">Quick Links</h3>
+                <ul class="footer-links">
+                    <li class="footer-link"><a href="aboutus.html">About Us</a></li>
+                    <li class="footer-link"><a href="amenities.html">Amenities</a></li>
+                    <li class="footer-link"><a href="brochure.pdf">Download Brochure</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3 class="footer-title">Follow Us</h3>
+                <ul class="footer-links">
+                    <li class="footer-link"><a href="#facebook">Facebook</a></li>
+                    <li class="footer-link"><a href="#twitter">Twitter</a></li>
+                    <li class="footer-link"><a href="#instagram">Instagram</a></li>
+                    <li class="footer-link"><a href="#linkedin">LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Residential Welfare. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Check if user is logged in on page load
+        /*document.addEventListener('DOMContentLoaded', function() {
+            const loggedIn = localStorage.getItem("loggedIn");
+            if (!loggedIn) {
+                window.location.href = "b4log.html";                
+                return;
+            }
+            
+            // Fetch dashboard statistics
+            fetchDashboardStats();
+        });*/
+        const loggedIn = localStorage.getItem("loggedIn");
+        fetchDashboardStats();
+        // Fetch dashboard statistics from the backend
+        async function fetchDashboardStats() {
+            try {
+                // Set cards to loading state
+                document.getElementById('total-residents').classList.add('loading');
+                document.getElementById('pending-payments').classList.add('loading');
+                document.getElementById('total-posts').classList.add('loading');
+                
+                const response = await fetch('http://localhost:5000/admin/dashboard-stats');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard stats');
+                }
+                
+                const data = await response.json();
+                
+                // Update dashboard with real data
+                document.getElementById('total-residents').textContent = data.totalResidents;
+                document.getElementById('pending-payments').textContent = data.pendingPayments;
+                document.getElementById('total-posts').textContent = data.totalPosts;
+                
+                // Remove loading state
+                document.getElementById('total-residents').classList.remove('loading');
+                document.getElementById('pending-payments').classList.remove('loading');
+                document.getElementById('total-posts').classList.remove('loading');
+                
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error);
+                // In case of error, show error message or fallback values
+                document.getElementById('total-residents').textContent = 'Error';
+                document.getElementById('pending-payments').textContent = 'Error';
+                document.getElementById('total-posts').textContent = 'Error';
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem("loggedIn");
+            alert("You have been logged out.");
+            window.location.href = "b4log.html"; //updated path
+        }
+    </script>
+</body>
+</html>

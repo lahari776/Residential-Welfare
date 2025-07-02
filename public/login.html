@@ -68,7 +68,7 @@
                 return;
             }
 
-            fetch("http://localhost:5000/signup", {
+            fetch("http://localhost:5050/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, email, password })
@@ -89,7 +89,7 @@
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
 
-    fetch("http://localhost:5000/login", {
+    fetch("http://localhost:5050/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
@@ -102,8 +102,8 @@
 
             console.log("✅ Logged in user:", data.user); // Debugging Log
             ///
-            //window.location.href = 'p3.html'; 
-            window.location.href = "user-home.html"; // ✅ Redirects to Community Page
+            //window.location.href = 'p3.html';
+            window.location.href = "html/user-home.html"; // Updated path ✅ Redirects to Community Page
         } else {
             alert("Invalid email or password.");
         }

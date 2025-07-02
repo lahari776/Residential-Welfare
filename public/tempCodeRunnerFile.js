@@ -257,7 +257,7 @@ const localIp = getLocalIp();
 
 // ✅ Serve b4login.html on root
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "b4log.html"));
+    res.sendFile(path.join(__dirname, "html/b4log.html"));
 });
 
 // Start server
