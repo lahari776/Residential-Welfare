@@ -24,7 +24,7 @@ This project is ideal for residential societies, gated communities, or any housi
 
 - **Frontend:** HTML5, CSS3, JavaScript
 - **Backend:** Node.js with Express.js
-- **Database:** MySQL
+- **Database:** MySQL (Trying MariaDB...)
 - **Real-Time Notifications:** Socket.io (optional for real-time updates)
 - **Email Sending:** Nodemailer for email communication
 - **WhatsApp Integration:** CSV data export import scripts. Or API integration whatever is feseble.
