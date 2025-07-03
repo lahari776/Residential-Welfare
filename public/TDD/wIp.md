@@ -37,7 +37,7 @@ This project is ideal for residential societies, gated communities, or any housi
 To run this application locally, you'll need the following installed:
 
 - **Node.js**: To run the backend.
-- **MySQL**: For the database.
+- **MariaDB**: For the database.
 - **phpMyAdmin**: For database management.
 - **Postman** (optional): For testing APIs.
 - **Email Account:** Set up an email account for Nodemailer to send emails (e.g., Gmail, SMTP server).
