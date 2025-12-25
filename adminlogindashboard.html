@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background: #27ae60;
+            color: white;
+        }
+        .paid {
+            color: green;
+        }
+        .pending {
+            color: red;
+        }
+        button {
+            padding: 8px 12px;
+            margin-top: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Admin Dashboard - Payment Status</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Resident</th>
+                    <th>Amount Due</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="paymentTable">
+            </tbody>
+        </table>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+        function loadPayments() {
+            const payments = JSON.parse(localStorage.getItem("payments")) || [];
+            const table = document.getElementById("paymentTable");
+            table.innerHTML = "";
+            
+            payments.forEach(payment => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${payment.resident}</td>
+                    <td>$${payment.amount}</td>
+                    <td>${payment.dueDate}</td>
+                    <td class="${payment.status === 'Paid' ? 'paid' : 'pending'}">${payment.status}</td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem("adminLoggedIn");
+            window.location.href = "adminlogin.html";
+        }
+
+        window.onload = loadPayments;
+    </script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resident Complaints</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #35654d;
+        }
+        .navbar-brand, .nav-link {
+            color: white !important;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary {
+            background-color: #35654d;
+            border-color: #35654d;
+        }
+        .btn-primary:hover {
+            background-color: #2a5040;
+            border-color: #2a5040;
+        }
+        .badge-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-in-progress {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .badge-resolved {
+            background-color: #28a745;
+            color: white;
+        }
+        .complaint-details {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 5px solid #35654d;
+        }
+        .admin-response {
+            background-color: #e9f5ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 5px solid #007bff;
+        }
+        .create-complaint {
+            display: none;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.7rem;
+            border-radius: 30px;
+        }
+        .timestamp {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        #logout-btn {
+            color: white;
+            background-color: rgba(255,255,255,0.2);
+            border: none;
+        }
+        #logout-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    
+    
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="card-title"><i class="fas fa-exclamation-circle me-2"></i>My Complaints</h2>
+                            <button class="btn btn-primary" id="new-complaint-btn">
+                                <i class="fas fa-plus me-1"></i> New Complaint
+                            </button>
+                        </div>
+                        
+                        <!-- Complaint Form -->
+                        <div id="complaint-form" class="create-complaint mb-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3"><i class="fas fa-plus-circle me-2"></i>Submit New Complaint</h5>
+                                    <form id="new-complaint-form">
+                                        <div class="mb-3">
+                                            <label for="complaint-title" class="form-label">Title</label>
+                                            <input type="text" class="form-control" id="complaint-title" required placeholder="Brief title of your complaint">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="complaint-category" class="form-label">Category</label>
+                                            <select class="form-select" id="complaint-category" required>
+                                                <option value="" disabled selected>Select a category</option>
+                                                <option value="Water Supply">Water Supply</option>
+                                                <option value="Electricity">Electricity</option>
+                                                <option value="Plumbing">Plumbing</option>
+                                                <option value="Security">Security</option>
+                                                <option value="Noise">Noise</option>
+                                                <option value="Lift/Elevator">Lift/Elevator</option>
+                                                <option value="Cleanliness">Cleanliness</option>
+                                                <option value="Parking">Parking</option>
+                                                <option value="Common Areas">Common Areas</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="complaint-description" class="form-label">Description</label>
+                                            <textarea class="form-control" id="complaint-description" rows="4" required placeholder="Detailed description of the issue..."></textarea>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            <button type="button" class="btn btn-secondary me-2" id="cancel-complaint-btn">Cancel</button>
+                                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i> Submit</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Complaints List -->
+                        <div id="complaints-list">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="me-3"><strong>Filter:</strong></span>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-secondary active" data-filter="all">All</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-filter="pending">Pending</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-filter="in-progress">In Progress</button>
+                                        <button type="button" class="btn btn-outline-secondary" data-filter="resolved">Resolved</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="no-complaints-message" style="display: none;" class="text-center py-5">
+                                <i class="fas fa-clipboard-check fa-3x mb-3 text-muted"></i>
+                                <h5>No complaints found</h5>
+                                <p class="text-muted">You haven't submitted any complaints yet.</p>
+                            </div>
+                            
+                            <div id="complaints-container">
+                                <!-- Complaints will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // User information - declare variable globally
+        let userId = null;
+        
+        // When page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get logged in user
+            userId = localStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = 'login.html'; // Redirect to login
+                return;
+            }
+            
+            // Initialize page
+            loadComplaints();
+            
+            // Event listeners
+            document.getElementById('new-complaint-btn').addEventListener('click', function() {
+                document.getElementById('complaint-form').style.display = 'block';
+                this.style.display = 'none';
+            });
+            
+            document.getElementById('cancel-complaint-btn').addEventListener('click', function() {
+                document.getElementById('complaint-form').style.display = 'none';
+                document.getElementById('new-complaint-btn').style.display = 'block';
+                document.getElementById('new-complaint-form').reset();
+            });
+            
+            document.getElementById('new-complaint-form').addEventListener('submit', submitComplaint);
+            
+            // Filter buttons
+            document.querySelectorAll('[data-filter]').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Toggle active class
+                    document.querySelectorAll('[data-filter]').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Filter complaints
+                    const filter = this.getAttribute('data-filter');
+                    filterComplaints(filter);
+                });
+            });
+            
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('userId');
+                window.location.href = 'b4login.html';
+            });
+        });
+        
+        // Load user complaints
+        async function loadComplaints() {
+            try {
+                const response = await fetch(`/complaints/user/${userId}`);
+                const complaints = await response.json();
+                
+                if (complaints.length === 0) {
+                    document.getElementById('no-complaints-message').style.display = 'block';
+                    document.getElementById('complaints-container').innerHTML = '';
+                    return;
+                }
+                
+                document.getElementById('no-complaints-message').style.display = 'none';
+                renderComplaints(complaints);
+            } catch (error) {
+                console.error('Error loading complaints:', error);
+                alert('Failed to load complaints. Please try again later.');
+            }
+        }
+        
+        // Render complaints list
+        function renderComplaints(complaints) {
+            const container = document.getElementById('complaints-container');
+            container.innerHTML = '';
+            
+            complaints.forEach(complaint => {
+                // Format dates
+                const createdDate = new Date(complaint.created_at);
+                const updatedDate = new Date(complaint.updated_at);
+                
+                // Get status badge class
+                let statusClass = '';
+                switch(complaint.status) {
+                    case 'Pending':
+                        statusClass = 'badge-pending';
+                        break;
+                    case 'In Progress':
+                        statusClass = 'badge-in-progress';
+                        break;
+                    case 'Resolved':
+                        statusClass = 'badge-resolved';
+                        break;
+                }
+                
+                // Create complaint card
+                const card = document.createElement('div');
+                card.className = `card mb-3 complaint-item ${complaint.status.toLowerCase().replace(' ', '-')}`;
+                
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title mb-0">${complaint.title}</h5>
+                            <span class="badge status-badge ${statusClass}">${complaint.status}</span>
+                        </div>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            <i class="fas fa-tag me-1"></i> ${complaint.category}
+                        </h6>
+                        <div class="timestamp">
+                            <i class="far fa-calendar-alt me-1"></i> Submitted: ${createdDate.toLocaleDateString()} at ${createdDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        </div>
+                        
+                        <div class="complaint-details mt-3">
+                            <p class="card-text">${complaint.description}</p>
+                        </div>
+                        
+                        ${complaint.admin_response ? `
+                            <div class="admin-response">
+                                <h6><i class="fas fa-reply me-1"></i> Admin Response:</h6>
+                                <p class="mb-1">${complaint.admin_response}</p>
+                                <div class="timestamp">
+                                    <i class="far fa-clock me-1"></i> Updated: ${updatedDate.toLocaleDateString()} at ${updatedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${complaint.status === 'Pending' ? `
+                            <div class="d-flex justify-content-end mt-3">
+                                <button class="btn btn-sm btn-outline-primary update-btn" data-id="${complaint.id}">
+                                    <i class="fas fa-edit me-1"></i> Update Details
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+                
+                // Add event listener for update button if present
+                const updateBtn = card.querySelector('.update-btn');
+                if (updateBtn) {
+                    updateBtn.addEventListener('click', () => showUpdateForm(complaint));
+                }
+            });
+        }
+        
+        // Filter complaints by status
+        function filterComplaints(filter) {
+            const items = document.querySelectorAll('.complaint-item');
+            
+            items.forEach(item => {
+                if (filter === 'all') {
+                    item.style.display = 'block';
+                } else {
+                    if (item.classList.contains(filter)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+            
+            // Show no complaints message if none are visible
+            const visibleItems = Array.from(items).filter(item => item.style.display !== 'none');
+            if (visibleItems.length === 0) {
+                document.getElementById('no-complaints-message').style.display = 'block';
+            } else {
+                document.getElementById('no-complaints-message').style.display = 'none';
+            }
+        }
+        
+        // Submit new complaint
+        async function submitComplaint(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('complaint-title').value.trim();
+            const category = document.getElementById('complaint-category').value;
+            const description = document.getElementById('complaint-description').value.trim();
+            
+            if (!title || !category || !description) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/complaints', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        title,
+                        category,
+                        description
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Reset form and hide it
+                    document.getElementById('new-complaint-form').reset();
+                    document.getElementById('complaint-form').style.display = 'none';
+                    document.getElementById('new-complaint-btn').style.display = 'block';
+                    
+                    // Reload complaints
+                    loadComplaints();
+                    
+                    alert('Complaint submitted successfully!');
+                } else {
+                    throw new Error(result.error || 'Failed to submit complaint');
+                }
+            } catch (error) {
+                console.error('Error submitting complaint:', error);
+                alert(error.message || 'Failed to submit complaint. Please try again later.');
+            }
+        }
+        
+        // Show update form for an existing complaint
+        function showUpdateForm(complaint) {
+            // Hide the new complaint button
+            document.getElementById('new-complaint-btn').style.display = 'none';
+            
+            // Get the complaint form and modify it
+            const form = document.getElementById('complaint-form');
+            form.style.display = 'block';
+            
+            // Update form title
+            form.querySelector('.card-title').innerHTML = '<i class="fas fa-edit me-2"></i>Update Complaint';
+            
+            // Fill form with existing values
+            document.getElementById('complaint-title').value = complaint.title;
+            document.getElementById('complaint-title').disabled = true;
+            
+            document.getElementById('complaint-category').value = complaint.category;
+            document.getElementById('complaint-category').disabled = true;
+            
+            document.getElementById('complaint-description').value = complaint.description;
+            
+            // Change the submit button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-save me-1"></i> Update';
+            
+            // Remove the current submit handler
+            const complaintForm = document.getElementById('new-complaint-form');
+            const oldSubmitHandler = complaintForm.onsubmit;
+            complaintForm.onsubmit = null;
+            
+            // Add a new submit handler for updating
+            complaintForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const description = document.getElementById('complaint-description').value.trim();
+                
+                if (!description) {
+                    alert('Please provide a description');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/complaints/${complaint.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            description
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        // Reset everything back
+                        resetComplaintForm();
+                        
+                        // Reload complaints
+                        loadComplaints();
+                        
+                        alert('Complaint updated successfully!');
+                    } else {
+                        throw new Error(result.error || 'Failed to update complaint');
+                    }
+                } catch (error) {
+                    console.error('Error updating complaint:', error);
+                    alert(error.message || 'Failed to update complaint. Please try again later.');
+                }
+            }, { once: true });
+            
+            // Update the cancel button to reset everything
+            document.getElementById('cancel-complaint-btn').onclick = resetComplaintForm;
+        }
+        
+        // Reset the complaint form back to its original state
+        function resetComplaintForm() {
+            const form = document.getElementById('complaint-form');
+            form.style.display = 'none';
+            
+            // Reset title
+            form.querySelector('.card-title').innerHTML = '<i class="fas fa-plus-circle me-2"></i>Submit New Complaint';
+            
+            // Reset form fields
+            document.getElementById('complaint-title').disabled = false;
+            document.getElementById('complaint-category').disabled = false;
+            document.getElementById('new-complaint-form').reset();
+            
+            // Reset submit button
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane me-1"></i> Submit';
+            
+            // Show the new complaint button
+            document.getElementById('new-complaint-btn').style.display = 'block';
+            
+            // Reset submit handler
+            const complaintForm = document.getElementById('new-complaint-form');
+            complaintForm.onsubmit = submitComplaint;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Payment Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            background-color: #f9fafb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .summary-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-pending {
+            color: var(--warning-color);
+        }
+
+        .status-completed {
+            color: var(--success-color);
+        }
+
+        .status-failed {
+            color: var(--danger-color);
+        }
+
+        .payment-card {
+            border-left: 4px solid #ddd;
+            transition: all 0.2s ease;
+        }
+
+        .payment-card.pending {
+            border-left-color: var(--warning-color);
+        }
+
+        .payment-card.completed {
+            border-left-color: var(--success-color);
+        }
+
+        .payment-card.failed {
+            border-left-color: var(--danger-color);
+        }
+
+        .payment-card.overdue {
+            border-left-color: var(--danger-color);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+        }
+
+        #logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #ddd;
+            border-bottom-color: var(--primary-color);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!--
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-building me-2"></i>Residential Welfare Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin-dashboard.html">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="admin-payments.html">Payments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin-community.html">Community</a>
+                    </li>
+                </ul>
+            </div>
+            <button id="logout-btn" class="btn btn-outline-light">Logout</button>
+        </div>
+    </nav>
+-->
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-4">Payment Dashboard</h1>
+                <div class="row" id="summary-cards">
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Pending</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-pending" id="pending-count">...</h2>
+                                    <i class="fas fa-clock fa-2x status-pending"></i>
+                                </div>
+                                <p class="card-text" id="pending-amount">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Completed</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-completed" id="completed-count">...</h2>
+                                    <i class="fas fa-check-circle fa-2x status-completed"></i>
+                                </div>
+                                <p class="card-text" id="completed-amount">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Failed</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-failed" id="failed-count">...</h2>
+                                    <i class="fas fa-times-circle fa-2x status-failed"></i>
+                                </div>
+                                <p class="card-text" id="failed-amount">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Overdue Payments</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-failed" id="overdue-count">...</h2>
+                                    <i class="fas fa-exclamation-triangle fa-2x status-failed"></i>
+                                </div>
+                                <p class="card-text" id="overdue-amount">$0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Payments Management</h5>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                            <i class="fas fa-plus me-1"></i> Add Payment
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="pills-all-tab" data-bs-toggle="pill" data-bs-target="#pills-all" type="button" role="tab">All Payments</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pills-upcoming-tab" data-bs-toggle="pill" data-bs-target="#pills-upcoming" type="button" role="tab">Upcoming (7 days)</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="pills-overdue-tab" data-bs-toggle="pill" data-bs-target="#pills-overdue" type="button" role="tab">Overdue</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="pills-tabContent">
+                            <div class="tab-pane fade show active" id="pills-all" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>User</th>
+                                                <th>Amount</th>
+                                                <th>Category</th>
+                                                <th>Status</th>
+                                                <th>Due Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="all-payments-table">
+                                            <tr>
+                                                <td colspan="7" class="text-center">
+                                                    <span class="loader"></span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="pills-upcoming" role="tabpanel">
+                                <h5 class="mb-3">Upcoming Payments (Next 7 Days)</h5>
+                                <div id="upcoming-payments-list">
+                                    <div class="text-center">
+                                        <span class="loader"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="pills-overdue" role="tabpanel">
+                                <h5 class="mb-3">Overdue Payments</h5>
+                                <div id="overdue-payments-list">
+                                    <div class="text-center">
+                                        <span class="loader"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Payment Modal -->
+    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-payment-form">
+                        <div class="mb-3">
+                            <label for="user-select" class="form-label">User</label>
+                            <select class="form-select" id="user-select" required>
+                                <option value="">Select User</option>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount-input" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="amount-input" min="0.01" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category-select" class="form-label">Category</label>
+                            <select class="form-select" id="category-select" required>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Security">Security</option>
+                                <option value="Water">Water</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="status-select" class="form-label">Status</label>
+                            <select class="form-select" id="status-select" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Failed">Failed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="due-date-input" class="form-label">Due Date</label>
+                            <input type="date" class="form-control" id="due-date-input" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="add-payment-btn">Add Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Payment Modal -->
+    <div class="modal fade" id="updatePaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="update-payment-form">
+                        <input type="hidden" id="payment-id-input">
+                        <div class="mb-3">
+                            <label class="form-label">User</label>
+                            <input type="text" class="form-control" id="user-display" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update-amount-input" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="update-amount-input" min="0.01" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update-status-select" class="form-label">Status</label>
+                            <select class="form-select" id="update-status-select" required>
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Failed">Failed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update-due-date-input" class="form-label">Due Date</label>
+                            <input type="date" class="form-control" id="update-due-date-input" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="update-payment-btn">Update Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deletePaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this payment record?</p>
+                    <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                    <input type="hidden" id="delete-payment-id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="admin-payments.js"></script>
+</body>
+</html>

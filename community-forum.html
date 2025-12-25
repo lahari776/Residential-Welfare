@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Forum</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f4f4f4; padding-top: 80px; }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+        .new-post input, .new-post textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        .btn:hover { background: #218c53; }
+        .post {
+            background: #ffffff;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .post:hover { transform: scale(1.02); }
+        .post h3 { margin-bottom: 5px; color: #34495e; }
+        .post small { color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>📝 Community Forum</h2>
+
+        <div class="new-post">
+            <input type="text" id="postTitle" placeholder="Enter post title">
+            <textarea id="postContent" rows="3" placeholder="Write something..."></textarea>
+            <select id="postCategory">
+                <option value="events">🎉 Events</option>
+                <option value="announcements">📢 Announcements</option>
+                <option value="help">🤝 Help & Assistance</option>
+                <option value="security">🚨 Security</option>
+                <option value="home_business">🏡 Home Business & Services</option>
+                <option value="marketplace">🏷️ Buy & Sell</option>
+                <option value="lost_found">🔍 Lost & Found</option>
+                <option value="open_discussion">💬 Open Discussion</option>
+            </select>
+            <button class="btn" onclick="addPost()">Post</button>
+        </div>
+
+        <h3>Your Posts</h3>
+        <div id="userPosts"></div>
+
+        <h3>Community Posts</h3>
+        <div id="postList"></div>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    
+        function fetchPosts() {
+    fetch("http://localhost:5000/community")
+        .then(response => response.json())
+        .then(posts => {
+            const postList = document.getElementById("postList");
+            const userPosts = document.getElementById("userPosts");
+            const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+            postList.innerHTML = "";
+            userPosts.innerHTML = "";
+
+            posts.forEach(post => {
+                const postElement = document.createElement("div");
+                postElement.classList.add("post");
+
+                postElement.innerHTML = `
+                    <h3>${post.title}</h3>
+                    <p>${post.message}</p>
+                    <small>Category: ${post.category} | Posted by: ${post.username} on ${post.created_at}</small>
+                    <div id="comments-${post.id}" class="comments-section"></div>
+                    <input type="text" id="commentInput-${post.id}" placeholder="Write a comment..." />
+                    <button onclick="addComment(${post.id})">💬 Comment</button>
+                `;
+
+                if (currentUser && post.username === currentUser.username) {
+                    postElement.innerHTML += `
+                        <button onclick="editPost(${post.id})">✏ Edit</button>
+                        <button onclick="deletePost(${post.id})">🗑 Delete</button>
+                    `;
+                    userPosts.appendChild(postElement);
+                } else {
+                    postList.appendChild(postElement);
+                }
+
+                loadComments(post.id);
+            });
+        })
+        .catch(error => console.error("❌ Error fetching posts:", error));
+}
+
+function editPost(postId) {
+    const newMessage = prompt("Edit your post:");
+    if (!newMessage) return;
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    console.log(`✏ Editing Post ID: ${postId}, User ID: ${currentUser.id}`);
+
+    fetch(`http://localhost:5000/community/${postId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: currentUser.id, message: newMessage })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Post edited:", data);
+        alert("Post updated successfully!");
+        fetchPosts(); // Reload posts
+    })
+    .catch(error => console.error("❌ Error editing post:", error));
+}
+
+function deletePost(postId) {
+    const confirmDelete = confirm("Are you sure you want to delete this post?");
+    if (!confirmDelete) return;
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+    console.log(`🗑 Deleting Post ID: ${postId}, User ID: ${currentUser.id}`);
+
+    fetch(`http://localhost:5000/community/${postId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: currentUser.id }) // ✅ Fixed sending user_id
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Post deleted:", data);
+        alert("Post deleted successfully!");
+        fetchPosts(); // Reload posts
+    })
+    .catch(error => console.error("❌ Error deleting post:", error));
+}
+function addPost() {
+    const title = document.getElementById("postTitle").value;
+    const content = document.getElementById("postContent").value;
+    const category = document.getElementById("postCategory").value;
+
+    if (!title || !content) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser) {
+        alert("You must be logged in to post!");
+        return;
+    }
+
+    const postData = {
+        user_id: currentUser.id,
+        username: currentUser.username,
+        title: title, // 👈 FIXED HERE
+        category,
+        message: content
+    };
+
+    fetch("http://localhost:5000/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(postData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert("Post added successfully!");
+        fetchPosts(); // Reload posts
+    })
+    .catch(error => console.error("❌ Error adding post:", error));
+}
+
+function loadComments(postId) {
+    fetch(`http://localhost:5000/comments/${postId}`)
+        .then(response => response.json())
+        .then(comments => {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            commentsSection.innerHTML = "<h4>Comments:</h4>";
+
+            comments.forEach(comment => {
+                const commentElement = document.createElement("div");
+                commentElement.classList.add("comment");
+                commentElement.innerHTML = `
+                    <p>${comment.comment}</p>
+                    <small>— ${comment.username} on ${comment.created_at}</small>
+                `;
+                commentsSection.appendChild(commentElement);
+            });
+        })
+        .catch(error => console.error("❌ Error loading comments:", error));
+}
+function addComment(postId) {
+    const commentInput = document.getElementById(`commentInput-${postId}`);
+    const commentText = commentInput.value.trim();
+    if (!commentText) return;
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser) {
+        alert("You must be logged in to comment!");
+        return;
+    }
+
+    const commentData = {
+        post_id: postId,
+        user_id: currentUser.id,
+        username: currentUser.username,
+        comment: commentText
+    };
+
+    fetch("http://localhost:5000/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(commentData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Comment added:", data);
+        commentInput.value = ""; // Clear input field
+        loadComments(postId); // Reload comments
+    })
+    .catch(error => console.error("❌ Error adding comment:", error));
+}
+
+
+    
+        document.addEventListener("DOMContentLoaded", fetchPosts);
+    </script>
+    
+</body>
+</html>

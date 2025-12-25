@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resident Profile</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary: #6b8e23;
+      --primary-light: #eef2ff;
+      --secondary: #6c757d;
+      --dark: #343a40;
+      --light: #f8f9fa;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #f6f9fc 0%, #edf1f7 100%);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .card-style {
+      border-radius: 16px;
+      border: none;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+    }
+    
+    .card-style:hover {
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .profile-card {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .profile-header {
+      background: linear-gradient(120deg, var(--primary) 0%, #738eff 100%);
+      height: 100px;
+      border-radius: 16px 16px 0 0;
+      position: relative;
+    }
+    
+    .profile-img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 3px solid white;
+      background-color: #e9ecef;
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--primary);
+    }
+    
+    .profile-body {
+      margin-top: 50px;
+      padding: 1rem;
+    }
+    
+    .tab-button {
+      cursor: pointer;
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      font-weight: 500;
+      color: var(--secondary);
+      border-bottom: 2px solid transparent;
+      transition: var(--transition);
+    }
+    
+    .tab-button:hover {
+      color: var(--primary);
+    }
+    
+    .tab-button.active {
+      border-bottom: 3px solid var(--primary);
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+      padding: 1rem 0;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .info-label {
+      color: var(--secondary);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    .info-text {
+      color: var(--dark);
+      font-weight: 500;
+    }
+    
+    .section-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      margin-bottom: 1.25rem;
+      color: var(--dark);
+      position: relative;
+      padding-bottom: 8px;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 3px;
+      width: 40px;
+      background-color: var(--primary);
+      border-radius: 2px;
+    }
+    
+    .activity-item {
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      background-color: var(--light);
+      transition: var(--transition);
+    }
+    
+    .activity-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .activity-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .activity-title {
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .activity-date {
+      color: var(--secondary);
+      font-size: 0.85rem;
+    }
+    
+    .activity-content {
+      color: #555;
+      font-size: 0.95rem;
+    }
+    
+    .badge-custom {
+      background-color: var(--primary-light);
+      color: var(--primary);
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+    
+    .stats-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 1.5rem 0 1rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      background-color: var(--primary-light);
+      min-width: 80px;
+    }
+    
+    .stat-number {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0;
+      line-height: 1.2;
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--secondary);
+      margin-bottom: 0;
+    }
+    
+    .icon-circle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--primary-light);
+      color: var(--primary);
+      margin-right: 10px;
+    }
+    
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    
+    .detail-item {
+      padding: 10px;
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+    
+    .detail-item:hover {
+      background-color: var(--primary-light);
+    }
+    
+    /* Payment specific styles */
+    .payment-item {
+      border-left: 4px solid var(--secondary);
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 0 12px 12px 0;
+      background-color: var(--light);
+      transition: var(--transition);
+    }
+    
+    .payment-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .payment-item.pending {
+      border-left-color: var(--warning);
+    }
+    
+    .payment-item.completed {
+      border-left-color: var(--success);
+    }
+    
+    .payment-item.failed {
+      border-left-color: var(--danger);
+    }
+    
+    .payment-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .status-pending {
+      background-color: rgba(255, 193, 7, 0.15);
+      color: #856404;
+    }
+    
+    .status-completed {
+      background-color: rgba(40, 167, 69, 0.15);
+      color: #155724;
+    }
+    
+    .status-failed {
+      background-color: rgba(220, 53, 69, 0.15);
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container py-5">
+    <div class="row g-4">
+      <!-- Left Column: Basic Info -->
+      <div class="col-lg-4">
+        <div class="card card-style profile-card mb-4">
+          <div class="profile-header"></div>
+          <div class="profile-img">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="profile-body text-center">
+            <h4 id="userName" class="mb-1">Loading...</h4>
+            <p id="userEmail" class="text-muted mb-2">
+              <i class="fas fa-envelope-open me-2"></i>Loading...
+            </p>
+            <p id="userAddress" class="text-muted mb-3">
+              <i class="fas fa-map-marker-alt me-2"></i>Loading address...
+            </p>
+            <div class="badge-custom">
+              <i class="fas fa-home me-1"></i><span id="residencyBadge">Resident</span>
+            </div>
+            
+            <div class="stats-container">
+              <div class="stat-item">
+                <p class="stat-number" id="postCount">0</p>
+                <p class="stat-label">Posts</p>
+              </div>
+              <div class="stat-item">
+                <p class="stat-number" id="commentCount">0</p>
+                <p class="stat-label">Comments</p>
+              </div>
+              <div class="stat-item">
+                <p class="stat-number" id="paymentCount">0</p>
+                <p class="stat-label">Payments</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="card card-style p-4 mb-4">
+          <div class="section-title">Quick Actions</div>
+          <div class="d-grid gap-2">
+            <button id="editProfileButton" class="btn btn-outline-primary">
+              <i class="fas fa-edit me-2"></i>Edit Profile
+            </button>
+
+            <button class="btn btn-outline-primary">
+              <i class="fas fa-cog me-2"></i>Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Profile Details -->
+      <div class="col-lg-8">
+        <!-- Details Card -->
+        <div class="card card-style p-4 mb-4">
+          <div class="section-title">User Details</div>
+          <div class="details-grid">
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-user"></i>
+                </div>
+                <span class="info-label">Full Name</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="fullName">Loading...</div>
+            </div>
+            
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-phone"></i>
+                </div>
+                <span class="info-label">Phone</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="phone">Loading...</div>
+            </div>
+            
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <span class="info-label">Address</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="address">Loading...</div>
+            </div>
+            
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-building"></i>
+                </div>
+                <span class="info-label">Unit Number</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="unit">Loading...</div>
+            </div>
+            
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-home"></i>
+                </div>
+                <span class="info-label">Residency Type</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="residency">Loading...</div>
+            </div>
+            
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-calendar-check"></i>
+                </div>
+                <span class="info-label">Move-In Date</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="moveIn">Loading...</div>
+            </div>
+            
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-phone-volume"></i>
+                </div>
+                <span class="info-label">Emergency Contact</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="emergencyContact">Loading...</div>
+            </div>
+            
+            <div class="detail-item">
+              <div class="d-flex align-items-center mb-1">
+                <div class="icon-circle">
+                  <i class="fas fa-ambulance"></i>
+                </div>
+                <span class="info-label">Emergency Phone</span>
+              </div>
+              <div class="ps-4 ms-2 info-text" id="emergencyPhone">Loading...</div>
+            </div>
+          </div>
+          
+          <div class="mt-4 p-3 rounded" style="background-color: var(--light);">
+            <div class="d-flex align-items-center mb-2">
+              <div class="icon-circle">
+                <i class="fas fa-info-circle"></i>
+              </div>
+              <span class="info-label">Bio</span>
+            </div>
+            <div class="ps-2 info-text" id="bio">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Activity Section -->
+        <div class="card card-style p-4">
+          <div class="section-title">Activity</div>
+          <div class="d-flex mb-3 border-bottom">
+            <button class="tab-button active" onclick="switchTab('posts')">
+              <i class="fas fa-clipboard me-2"></i>Posts
+            </button>
+            <button class="tab-button" onclick="switchTab('comments')">
+              <i class="fas fa-comments me-2"></i>Comments
+            </button>
+            <button class="tab-button" onclick="switchTab('payments')">
+              <i class="fas fa-money-bill-wave me-2"></i>Payments
+            </button>
+          </div>
+          
+          <div id="posts" class="tab-content active">
+            <!-- Posts will be loaded dynamically -->
+            <p class="text-center py-3">Loading posts...</p>
+          </div>
+          
+          <div id="comments" class="tab-content">
+            <!-- Comments will be loaded dynamically -->
+            <p class="text-center py-3">Loading comments...</p>
+          </div>
+          
+          <div id="payments" class="tab-content">
+            <!-- Payments will be loaded dynamically -->
+            <p class="text-center py-3">Loading payment history...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editProfileForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="editFullName" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="editFullName" name="full_name">
+            </div>
+            <div class="col-md-6">
+              <label for="editEmail" class="form-label">Email</label>
+              <input type="email" class="form-control" id="editEmail" name="email">
+            </div>
+            <div class="col-md-6">
+              <label for="editPhone" class="form-label">Phone</label>
+              <input type="tel" class="form-control" id="editPhone" name="phone">
+            </div>
+            <div class="col-md-6">
+              <label for="editAddress" class="form-label">Address</label>
+              <input type="text" class="form-control" id="editAddress" name="address">
+            </div>
+            <div class="col-md-6">
+              <label for="editUnit" class="form-label">Unit Number</label>
+              <input type="text" class="form-control" id="editUnit" name="unit_number">
+            </div>
+            <div class="col-md-6">
+              <label for="editResidency" class="form-label">Residency Type</label>
+              <select class="form-select" id="editResidency" name="residency_type">
+                <option value="Owner">Owner</option>
+                <option value="Tenant">Tenant</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="editMoveIn" class="form-label">Move-In Date</label>
+              <input type="date" class="form-control" id="editMoveIn" name="move_in_date">
+            </div>
+            <div class="col-md-6">
+              <label for="editEmergencyContact" class="form-label">Emergency Contact Name</label>
+              <input type="text" class="form-control" id="editEmergencyContact" name="emergency_contact_name">
+            </div>
+            <div class="col-md-6">
+              <label for="editEmergencyPhone" class="form-label">Emergency Contact Phone</label>
+              <input type="tel" class="form-control" id="editEmergencyPhone" name="emergency_contact_phone">
+            </div>
+            <div class="col-12">
+              <label for="editBio" class="form-label">Bio</label>
+              <textarea class="form-control" id="editBio" name="bio" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Check if user is logged in
+  document.addEventListener('DOMContentLoaded', function() {
+    const userId = localStorage.getItem('userId');
+    if (!userId || userId === 'null') {
+      alert("Please log in first.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    // Load user profile data
+    loadProfile();
+    
+    // Add event listeners for buttons
+    const editProfileButton = document.getElementById('editProfileButton');
+    if (editProfileButton) {
+      editProfileButton.addEventListener('click', openEditProfileModal);
+    }
+    
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    if (saveProfileBtn) {
+      saveProfileBtn.addEventListener('click', saveProfileChanges);
+    }
+  });
+
+  
+  // Tab switching function
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+    document.getElementById(tab).classList.add('active');
+  }
+ 
+  // Load profile data
+  async function loadProfile() {
+    try {
+      const userId = localStorage.getItem('userId');
+      
+      const response = await fetch(`http://localhost:5000/profile/${userId}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Profile data received:", data);
+      
+      if (!data.user) {
+        throw new Error("No user data in response");
+      }
+      
+      const { user, posts, comments } = data;
+      
+      // Update basic info
+      document.getElementById('userName').textContent = user.username || "N/A";
+      document.getElementById('userEmail').textContent = user.email || "N/A";
+      document.getElementById('userAddress').textContent = user.address || "N/A";
+      document.getElementById('residencyBadge').textContent = user.residency_type || "Resident";
+      document.getElementById('postCount').textContent = posts ? posts.length : 0;
+      document.getElementById('commentCount').textContent = comments ? comments.length : 0;
+      
+      // Update user details
+      document.getElementById('fullName').textContent = user.full_name || "N/A";
+      document.getElementById('phone').textContent = user.phone || "N/A";
+      document.getElementById('address').textContent = user.address || "N/A";
+      document.getElementById('unit').textContent = user.unit_number || "N/A";
+      document.getElementById('residency').textContent = user.residency_type || "N/A";
+      document.getElementById('moveIn').textContent = user.move_in_date || "N/A";
+      document.getElementById('emergencyContact').textContent = user.emergency_contact_name || "N/A";
+      document.getElementById('emergencyPhone').textContent = user.emergency_contact_phone || "N/A";
+      document.getElementById('bio').textContent = user.bio || "N/A";
+      
+      // Update posts tab
+      const postsContainer = document.getElementById('posts');
+      postsContainer.innerHTML = posts && posts.length > 0
+        ? posts.map(p => `
+            <div class="activity-item">
+              <div class="activity-header">
+                <div class="activity-title">${p.title || 'Untitled'}</div>
+                <div class="activity-date">${new Date(p.created_at).toLocaleDateString()}</div>
+              </div>
+              <div class="activity-content">
+                ${p.message || 'No content'}
+              </div>
+            </div>
+          `).join('')
+        : `<p class="p-3">No posts yet.</p>`;
+      
+      // Update comments tab
+      const commentsContainer = document.getElementById('comments');
+      commentsContainer.innerHTML = comments && comments.length > 0
+        ? comments.map(c => `
+            <div class="activity-item">
+              <div class="activity-header">
+                <div class="activity-title">On: ${c.post_title || 'Unknown Post'}</div>
+                <div class="activity-date">${new Date(c.created_at).toLocaleDateString()}</div>
+              </div>
+              <div class="activity-content">
+                ${c.comment || 'No content'}
+              </div>
+            </div>
+          `).join('')
+        : `<p class="p-3">No comments yet.</p>`;
+      
+      // Load payment history
+      loadPaymentHistory(userId);
+      
+    } catch (err) {
+      console.error("Error loading profile:", err);
+      alert("Error loading profile. Please try again.");
+    }
+  }
+
+  // Load payment history
+  async function loadPaymentHistory(userId) {
+    try {
+      const response = await fetch(`http://localhost:5000/user/payments/${userId}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      
+      const payments = await response.json();
+      console.log("Payments data received:", payments);
+      
+      // Update payment count in stats
+      document.getElementById('paymentCount').textContent = payments.length;
+      
+      // Update payments tab
+      const paymentsContainer = document.getElementById('payments');
+      
+      if (payments && payments.length > 0) {
+        // Sort payments by due date (most recent first)
+        payments.sort((a, b) => new Date(b.due_date) - new Date(a.due_date));
+        
+        paymentsContainer.innerHTML = payments.map(payment => {
+          // Determine status class for styling
+          const statusClass = payment.status.toLowerCase();
+          const statusDisplayClass = `status-${statusClass}`;
+          
+          // Format currency
+          const formattedAmount = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          }).format(payment.amount);
+          
+          // Format date
+          const dueDate = new Date(payment.due_date).toLocaleDateString();
+          const createdDate = payment.created_at ? new Date(payment.created_at).toLocaleDateString() : 'N/A';
+          
+          return `
+            <div class="payment-item ${statusClass}">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">${formattedAmount}</h5>
+                <span class="payment-status ${statusDisplayClass}">${payment.status}</span>
+              </div>
+              <div class="d-flex justify-content-between text-muted">
+                <div>
+                  <small><i class="fas fa-calendar-day me-1"></i> Due: ${dueDate}</small>
+                </div>
+                <div>
+                  <small><i class="fas fa-clock me-1"></i> Created: ${createdDate}</small>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        paymentsContainer.innerHTML = `
+          <div class="p-4 text-center">
+            <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-muted"></i>
+            <p>No payment records found.</p>
+          </div>
+        `;
+      }
+    } catch (err) {
+      console.error("Error loading payment history:", err);
+      document.getElementById('payments').innerHTML = `
+        <div class="p-3 text-center text-danger">
+          <i class="fas fa-exclamation-triangle mb-2"></i>
+          <p>Failed to load payment history. Please try again later.</p>
+        </div>
+      `;
+    }
+  }
+
+  // Open edit profile modal
+  function openEditProfileModal() {
+    try {
+      const userId = localStorage.getItem('userId');
+      
+      // Fetch current user data to populate the form
+      fetch(`http://localhost:5000/profile/${userId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!data.user) {
+            throw new Error("No user data in response");
+          }
+          
+          // Populate form fields
+          const user = data.user;
+          document.getElementById('editFullName').value = user.full_name || '';
+          document.getElementById('editEmail').value = user.email || '';
+          document.getElementById('editPhone').value = user.phone || '';
+          document.getElementById('editAddress').value = user.address || '';
+          document.getElementById('editUnit').value = user.unit_number || '';
+          document.getElementById('editResidency').value = user.residency_type || 'Tenant';
+          document.getElementById('editMoveIn').value = user.move_in_date || '';
+          document.getElementById('editEmergencyContact').value = user.emergency_contact_name || '';
+          document.getElementById('editEmergencyPhone').value = user.emergency_contact_phone || '';
+          document.getElementById('editBio').value = user.bio || '';
+          
+          // Initialize and show the modal
+          const modalElement = document.getElementById('editProfileModal');
+          const modal = new bootstrap.Modal(modalElement);
+          modal.show();
+        })
+        .catch(error => {
+          console.error("Error fetching profile data:", error);
+          alert("Error loading profile data: " + error.message);
+        });
+    } catch (error) {
+      console.error("Error in openEditProfileModal:", error);
+      alert("An error occurred: " + error.message);
+    }
+  }
+
+  // Save profile changes
+  async function saveProfileChanges() {
+  try {
+    const userId = localStorage.getItem('userId');
+    
+    // Form validation
+    const email = document.getElementById('editEmail').value;
+    if (!email || !email.includes('@')) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
+    // Gather form data
+    const formData = {
+      full_name: document.getElementById('editFullName').value,
+      email: email,
+      phone: document.getElementById('editPhone').value,
+      address: document.getElementById('editAddress').value,
+      unit_number: document.getElementById('editUnit').value,
+      residency_type: document.getElementById('editResidency').value,
+      move_in_date: document.getElementById('editMoveIn').value,
+      emergency_contact_name: document.getElementById('editEmergencyContact').value,
+      emergency_contact_phone: document.getElementById('editEmergencyPhone').value,
+      bio: document.getElementById('editBio').value
+    };
+
+    // Show loading indicator
+    const saveBtn = document.getElementById('saveProfileBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = "Saving...";
+    saveBtn.disabled = true;
+
+    // Send update request
+    const response = await fetch(`http://localhost:5000/profile/update/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+
+    // Reset button
+    saveBtn.textContent = originalText;
+    saveBtn.disabled = false;
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("Update success:", result);
+
+    // Hide modal
+    const modalElement = document.getElementById('editProfileModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal.hide();
+
+    // Reload profile data
+    setTimeout(() => {
+      loadProfile();
+    }, 300);
+
+    // Show success message
+    alert("Profile updated successfully!");
+
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    alert("Error updating profile: " + error.message);
+  }
+}
+// Add this to your edit profile form submission handler
+async function updateProfile(event) {
+  event.preventDefault();
+  
+  const formData = {
+    // Your form data collection here
+    full_name: document.getElementById('editFullName').value,
+    email: document.getElementById('editEmail').value,
+    // Other fields...
+  };
+  
+  try {
+    const response = await fetch(`http://localhost:5000/profile/update/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('Profile updated successfully');
+      // Reload profile data to update the UI
+      loadProfile();
+    } else {
+      alert('Error updating profile: ' + result.message);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('An error occurred while updating your profile');
+  }
+}
+</script>
+
+</body>
+</html>

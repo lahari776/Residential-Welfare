@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Net Banking Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .form-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px; 
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .amount-display {
+            text-align: center;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input:focus {
+            border-color: #3366cc;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #3366cc;
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #254ea4;
+        }
+    </style>
+    <script>
+        // Function to get URL parameters
+        function getUrlParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        
+        // Generate a payment ID (normally this would come from your backend)
+        function generatePaymentId() {
+            return "PAY" + Math.floor(Math.random() * 1000000000);
+        }
+        
+        // Get or retrieve user ID (normally from your auth system)
+        function getUserId() {
+            // For demonstration, using a fixed ID or getting from localStorage
+            return localStorage.getItem('userId') || "1001";
+        }
+
+        window.onload = function() {
+            const amount = getUrlParam('amount');
+            document.getElementById("amountDisplay").innerText = "Amount to Pay: ₹" + (amount || '0');
+        };
+        
+        function processPayment(event) {
+            event.preventDefault();
+            
+            // Get the amount from URL parameters
+            const amount = getUrlParam('amount');
+            
+            // Generate payment ID and get user ID
+            const paymentId = generatePaymentId();
+            const userId = getUserId();
+            
+            // Log values to help with debugging
+            console.log("Processing Net Banking payment with:", {
+                paymentId: paymentId,
+                userId: userId,
+                amount: amount,
+                accountNumber: document.getElementById('accountNumber').value
+            });
+            
+            // Redirect to success page with all required parameters
+            window.location.href = "payment-success.html?payment_id=" + encodeURIComponent(paymentId) + 
+                      "&user_id=" + encodeURIComponent(userId) + 
+                      "&amount=" + encodeURIComponent(amount) + 
+                      "&method=netbanking";
+        }
+    </script>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Net Banking Payment</h2>
+        <div class="amount-display" id="amountDisplay"></div>
+        <form onsubmit="processPayment(event)">
+            <label for="accountNumber">Account Number</label>
+            <input type="text" id="accountNumber" name="accountNumber" required>
+            
+            <label for="otp">OTP</label>
+            <input type="text" id="otp" name="otp" required>
+            
+            <button type="submit">Pay</button>
+        </form>
+    </div>
+</body>
+</html>

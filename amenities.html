@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facilities</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 40px 20px;
+            color: #2c2c2c;
+        }
+
+        .page-title {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-family: 'Lato', sans-serif;
+            font-size: 1rem;
+            font-weight: 300;
+            color: #666;
+            margin-bottom: 80px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .subtitle::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 1px;
+            background-color: #666;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            padding-right: 35px;
+        }
+
+        .hexagon {
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(135deg, #2c1f1f 0%, #1a1212 100%);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s ease;
+        }
+
+        .item:hover .hexagon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #3E2C2C 0%, #2c1f1f 100%);
+        }
+
+        .hexagon img {
+            width: 55%;
+            height: auto;
+            filter: invert(1);
+            transition: all 0.3s ease;
+        }
+
+        .content {
+            margin-left: 25px;
+            flex-grow: 1;
+        }
+
+        .text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .description {
+            font-family: 'Lato', sans-serif;
+            font-size: 0.9rem;
+            color: #666;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 0;
+            line-height: 1.5;
+        }
+
+        .item:hover .description {
+            max-height: 100px;
+            opacity: 1;
+            margin-top: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            color: #666;
+            font-size: 1rem;
+            font-family: 'Lato', sans-serif;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .page-title {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+                margin-bottom: 60px;
+            }
+
+            .item {
+                padding: 20px;
+            }
+
+            .text {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="page-title">Our Facilities</h1>
+    <p class="subtitle">Luxury Amenities for Your Comfort</p>
+    
+    <div class="container">
+        <div class="column">
+            <div class="item">
+                <div class="hexagon"><img src="gym.png" alt="Gym"></div>
+                <div class="content">
+                    <div class="text">Gym</div>
+                    <div class="description">State-of-the-art fitness equipment and personal training services available 24/7.</div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hexagon"><img src="guest.png" alt="Guest Rooms"></div>
+                <div class="content">
+                    <div class="text">Guest Rooms</div>
+                    <div class="description">Luxuriously appointed rooms with premium amenities and spectacular views.</div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hexagon"><img src="spa.png" alt="Spa"></div>
+                <div class="content">
+                    <div class="text">Spa & Salon</div>
+                    <div class="description">Rejuvenating treatments and professional beauty services in a serene environment.</div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hexagon"><img src="hall.png" alt="Multipurpose Hall"></div>
+                <div class="content">
+                    <div class="text">Multipurpose Hall</div>
+                    <div class="description">Versatile space for events, conferences, and celebrations with modern audiovisual equipment.</div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hexagon"><img src="lounge.png" alt="Business Lounge"></div>
+                <div class="content">
+                    <div class="text">Business Lounge</div>
+                    <div class="description">Professional workspace with high-speed internet and meeting facilities.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="column">
+            <div class="item">
+                <div class="hexagon"><img src="theatre.png" alt="Preview Theatre"></div>
+                <div class="content">
+                    <div class="text">Preview Theatre</div>
+                    <div class="description">Private cinema experience with premium sound and viewing technology.</div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hexagon"><img src="swimming.png" alt="Swimming Pool"></div>
+                <div class="content">
+                    <div class="text">Swimming Pool</div>
+                    <div class="description">Temperature-controlled infinity pool with panoramic views and lounging area.</div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hexagon"><img src="yoga.png" alt="Yoga/Meditation Hall"></div>
+                <div class="content">
+                    <div class="text">Yoga/Meditation Hall</div>
+                    <div class="description">Tranquil space for wellness activities with certified instructors.</div>
+                </div>
+            </div>
+            <div class="item">
+                <div class="hexagon"><img src="walking.png" alt="Walking/Jogging Trail"></div>
+                <div class="content">
+                    <div class="text">Walking / Jogging Trail</div>
+                    <div class="description">Scenic outdoor path perfect for morning walks and evening jogs.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Experience luxury and comfort in every detail
+    </div>
+</body>
+</html>

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f8f8f8;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #007bff;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid #eee;
+      text-align: center;
+    }
+    
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    button {
+      padding: 6px 12px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .message {
+      margin: 20px 0;
+      padding: 10px;
+      text-align: center;
+      background-color: #d4edda;
+      color: #155724;
+      border-radius: 4px;
+      display: none;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .loading {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .stat-card {
+      background-color: white;
+      border-radius: 4px;
+      padding: 15px;
+      flex-basis: 32%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    
+    .pending {
+      color: #ffc107;
+    }
+    
+    .completed {
+      color: #28a745;
+    }
+    
+    .tab {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+      margin-bottom: 20px;
+    }
+    
+    .tab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+      color: black;
+    }
+    
+    .tab button:hover {
+      background-color: #ddd;
+    }
+    
+    .tab button.active {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    .tabcontent {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+      animation: fadeEffect 1s;
+    }
+    
+    @keyframes fadeEffect {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    .category-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .category-rent {
+      background-color: #4e73df;
+    }
+    
+    .category-maintenance {
+      background-color: #f6c23e;
+    }
+    
+    .category-utility {
+      background-color: #36b9cc;
+    }
+    
+    .category-fee {
+      background-color: #e74a3b;
+    }
+    
+    .category-other {
+      background-color: #858796;
+    }
+
+    .categories-breakdown {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+
+    .category-chart {
+      display: flex;
+      width: 100%;
+      height: 30px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .category-section {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Payment Dashboard</h1>
+  
+  <div id="message" class="message"></div>
+  
+  <div class="stats-container">
+    <div class="stat-card">
+      <div>Total Payments</div>
+      <div class="stat-number" id="total-payments">-</div>
+    </div>
+    <div class="stat-card">
+      <div>Pending Amount</div>
+      <div class="stat-number pending" id="pending-amount">-</div>
+    </div>
+    <div class="stat-card">
+      <div>Paid Amount</div>
+      <div class="stat-number completed" id="paid-amount">-</div>
+    </div>
+  </div>
+  
+  <div class="categories-breakdown">
+    <h3>Payment Categories</h3>
+    <div id="category-chart" class="category-chart">
+      <!-- Will be filled dynamically -->
+    </div>
+    <div id="category-legend" style="margin-top: 10px; text-align: center;">
+      <!-- Will be filled dynamically -->
+    </div>
+  </div>
+  
+  <div class="tab">
+    <button class="tablinks active" onclick="openTab(event, 'all-payments')">All Payments</button>
+    <button class="tablinks" onclick="openTab(event, 'pending-payments')">Pending</button>
+    <button class="tablinks" onclick="openTab(event, 'completed-payments')">Completed</button>
+    <button class="tablinks" onclick="openTab(event, 'category-breakdown')">By Category</button>
+  </div>
+  
+  <div id="all-payments" class="tabcontent" style="display: block;">
+    <h2>All Payments</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Due Date</th>
+          <th>Payment Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="all-payments-body">
+        <tr><td colspan="6" class="loading">Loading payments...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div id="pending-payments" class="tabcontent">
+    <h2>Pending Payments</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Due Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="pending-payments-body">
+        <tr><td colspan="5" class="loading">Loading payments...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div id="completed-payments" class="tabcontent">
+    <h2>Completed Payments</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Due Date</th>
+          <th>Payment Date</th>
+        </tr>
+      </thead>
+      <tbody id="completed-payments-body">
+        <tr><td colspan="4" class="loading">Loading payments...</td></tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <div id="category-breakdown" class="tabcontent">
+    <h2>Payments by Category</h2>
+    <div id="category-filters" style="margin-bottom: 15px;">
+      <button onclick="filterCategoryPayments('all')" class="active">All</button>
+      <button onclick="filterCategoryPayments('Rent')">Rent</button>
+      <button onclick="filterCategoryPayments('Maintenance')">Maintenance</button>
+      <button onclick="filterCategoryPayments('Utility')">Utility</button>
+      <button onclick="filterCategoryPayments('Fee')">Fee</button>
+      <button onclick="filterCategoryPayments('Other')">Other</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Amount</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Due Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="category-payments-body">
+        <tr><td colspan="5" class="loading">Loading payments...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Use the correct port for your server
+    const API_BASE = 'http://localhost:5000';
+    let allPaymentsData = []; // Store all payments for filtering
+    
+    // Get userId from URL parameter
+    function getUserIdFromUrl() {
+      // First try to get from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      let userId = urlParams.get('userId');
+      
+      // If not in URL, try to get from localStorage (if you store it there after login)
+      if (!userId) {
+        userId = localStorage.getItem('userId');
+      }
+      
+      // If still not found, use a default ID for testing
+      // REMOVE THIS IN PRODUCTION - SECURITY RISK
+      if (!userId) {
+        console.warn("No user ID found - using default test ID");
+        userId = 5; // Default test ID
+      }
+      
+      // Validate that we have a numeric userId
+      if (!userId || isNaN(parseInt(userId))) {
+        console.error("Invalid or missing user ID");
+        showMessage("User ID is missing or invalid. Please log in again.", true);
+        return null;
+      }
+      
+      return parseInt(userId);
+    }
+    
+    // Display a message to the user
+    function showMessage(text, isError = false) {
+      const messageEl = document.getElementById("message");
+      messageEl.textContent = text;
+      messageEl.style.display = "block";
+      
+      if (isError) {
+        messageEl.classList.add("error");
+      } else {
+        messageEl.classList.remove("error");
+      }
+      
+      // Hide the message after 5 seconds
+      setTimeout(() => {
+        messageEl.style.display = "none";
+      }, 5000);
+    }
+    
+    // Format date to readable format
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+    
+    // Generate category badge
+    function getCategoryBadge(category) {
+      if (!category) return '<span class="category-badge category-other">Other</span>';
+      
+      const lowerCategory = category.toLowerCase();
+      const validCategories = ['rent', 'maintenance', 'utility', 'fee'];
+      
+      const categoryClass = validCategories.includes(lowerCategory) 
+        ? `category-${lowerCategory}` 
+        : 'category-other';
+      
+      return `<span class="category-badge ${categoryClass}">${category}</span>`;
+    }
+    
+    // Fetch payment statistics
+    async function fetchPaymentStats(userId) {
+      if (!userId) return;
+      
+      try {
+        // First try to use the stats endpoint
+        try {
+          const res = await fetch(`${API_BASE}/user/payments/stats/${userId}`);
+          const data = await res.json();
+          
+          document.getElementById("total-payments").textContent = 
+            data.stats.total_payments;
+          document.getElementById("pending-amount").textContent = 
+            `$${parseFloat(data.stats.total_pending_amount || 0).toFixed(2)}`;
+          document.getElementById("paid-amount").textContent = 
+            `$${parseFloat(data.stats.total_paid_amount || 0).toFixed(2)}`;
+            
+          // Update category breakdown
+          updateCategoryBreakdown(allPaymentsData);
+        } catch (statsErr) {
+          // If stats endpoint doesn't exist, calculate from regular payments
+          console.log("Stats endpoint not available, calculating from payments");
+          const res = await fetch(`${API_BASE}/user/payments/${userId}`);
+          const payments = await res.json();
+          allPaymentsData = payments;
+          
+          let totalPayments = payments.length;
+          let pendingAmount = 0;
+          let paidAmount = 0;
+          
+          payments.forEach(payment => {
+            if (payment.status === 'Pending') {
+              pendingAmount += parseFloat(payment.amount);
+            } else if (payment.status === 'Completed') {
+              paidAmount += parseFloat(payment.amount);
+            }
+          });
+          
+          document.getElementById("total-payments").textContent = totalPayments;
+          document.getElementById("pending-amount").textContent = `$${pendingAmount.toFixed(2)}`;
+          document.getElementById("paid-amount").textContent = `$${paidAmount.toFixed(2)}`;
+          
+          // Update category breakdown
+          updateCategoryBreakdown(payments);
+        }
+      } catch (err) {
+        console.error("Error fetching payment stats:", err);
+        showMessage("Failed to load payment statistics", true);
+      }
+    }
+    
+    // Update the category breakdown visualization
+    function updateCategoryBreakdown(payments) {
+      if (!payments || !Array.isArray(payments) || payments.length === 0) {
+        document.getElementById("category-chart").innerHTML = 
+          "<div class='category-section category-other' style='width: 100%'>No data</div>";
+        document.getElementById("category-legend").innerHTML = "";
+        return;
+      }
+      
+      // Collect amounts by category
+      const categories = {};
+      let totalAmount = 0;
+      
+      payments.forEach(payment => {
+        const amount = parseFloat(payment.amount);
+        const category = payment.category || 'Other';
+        
+        if (!categories[category]) {
+          categories[category] = 0;
+        }
+        
+        categories[category] += amount;
+        totalAmount += amount;
+      });
+      
+      // Create chart
+      const chartContainer = document.getElementById("category-chart");
+      const legendContainer = document.getElementById("category-legend");
+      
+      chartContainer.innerHTML = "";
+      legendContainer.innerHTML = "";
+      
+      // Color mapping
+      const categoryColors = {
+        'Rent': '#4e73df',
+        'Maintenance': '#f6c23e',
+        'Utility': '#36b9cc',
+        'Fee': '#e74a3b',
+        'Other': '#858796'
+      };
+      
+      // Create sections and legend
+      let legendHTML = "";
+      
+      Object.keys(categories).forEach(category => {
+        const percentage = (categories[category] / totalAmount) * 100;
+        const color = categoryColors[category] || categoryColors['Other'];
+        
+        // Add chart section
+        const section = document.createElement("div");
+        section.className = "category-section";
+        section.style.width = `${percentage}%`;
+        section.style.backgroundColor = color;
+        section.title = `${category}: $${categories[category].toFixed(2)} (${percentage.toFixed(1)}%)`;
+        
+        if (percentage > 10) {
+          section.textContent = `${percentage.toFixed(0)}%`;
+        }
+        
+        chartContainer.appendChild(section);
+        
+        // Add to legend
+        legendHTML += `
+          <span style="margin-right: 15px;">
+            <span style="display: inline-block; width: 12px; height: 12px; background-color: ${color}; margin-right: 5px;"></span>
+            ${category}: $${categories[category].toFixed(2)}
+          </span>
+        `;
+      });
+      
+      legendContainer.innerHTML = legendHTML;
+    }
+    
+    // Fetch all payments
+    async function fetchAllPayments(userId) {
+      if (!userId) return;
+      
+      try {
+        const res = await fetch(`${API_BASE}/user/payments/${userId}`);
+        if (!res.ok) {
+          throw new Error(`Server responded with status: ${res.status}`);
+        }
+        
+        const payments = await res.json();
+        console.log("Payments data:", payments); // Debug log
+        
+        // Store all payments for later filtering
+        allPaymentsData = payments;
+        
+        const allTableBody = document.getElementById("all-payments-body");
+        const pendingTableBody = document.getElementById("pending-payments-body");
+        const completedTableBody = document.getElementById("completed-payments-body");
+        const categoryTableBody = document.getElementById("category-payments-body");
+        
+        allTableBody.innerHTML = "";
+        pendingTableBody.innerHTML = "";
+        completedTableBody.innerHTML = "";
+        categoryTableBody.innerHTML = "";
+        
+        // Handle empty payments
+        if (!Array.isArray(payments) || payments.length === 0) {
+          allTableBody.innerHTML = "<tr><td colspan='6'>No payments found</td></tr>";
+          pendingTableBody.innerHTML = "<tr><td colspan='5'>No pending payments</td></tr>";
+          completedTableBody.innerHTML = "<tr><td colspan='4'>No completed payments</td></tr>";
+          categoryTableBody.innerHTML = "<tr><td colspan='5'>No payments found</td></tr>";
+          return;
+        }
+        
+        let pendingCount = 0;
+        let completedCount = 0;
+        
+        payments.forEach(payment => {
+          const categoryBadge = getCategoryBadge(payment.category);
+          
+          // Create row for all payments table
+          const allRow = document.createElement("tr");
+          allRow.innerHTML = `
+            <td>$${parseFloat(payment.amount).toFixed(2)}</td>
+            <td>${categoryBadge}</td>
+            <td>${payment.status}</td>
+            <td>${formatDate(payment.due_date)}</td>
+            <td>${formatDate(payment.payment_date)}</td>
+            <td>
+              ${payment.status === 'Pending' 
+                ? `<button onclick="payNow(${payment.id}, ${payment.amount})">Pay Now</button>`
+                : '<button disabled>Paid</button>'}
+            </td>
+          `;
+          allTableBody.appendChild(allRow);
+          
+          // Create row for pending payments table
+          if (payment.status === 'Pending') {
+            pendingCount++;
+            const pendingRow = document.createElement("tr");
+            pendingRow.innerHTML = `
+              <td>$${parseFloat(payment.amount).toFixed(2)}</td>
+              <td>${categoryBadge}</td>
+              <td>${formatDate(payment.due_date)}</td>
+              <td>${payment.status}</td>
+              <td><button onclick="payNow(${payment.id}, ${payment.amount})">Pay Now</button></td>
+            `;
+            pendingTableBody.appendChild(pendingRow);
+          }
+          
+          // Create row for completed payments table
+          if (payment.status === 'Completed') {
+            completedCount++;
+            const completedRow = document.createElement("tr");
+            completedRow.innerHTML = `
+              <td>$${parseFloat(payment.amount).toFixed(2)}</td>
+              <td>${categoryBadge}</td>
+              <td>${formatDate(payment.due_date)}</td>
+              <td>${formatDate(payment.payment_date)}</td>
+            `;
+            completedTableBody.appendChild(completedRow);
+          }
+          
+          // Add to category table (all categories initially)
+          const categoryRow = document.createElement("tr");
+          categoryRow.innerHTML = `
+            <td>$${parseFloat(payment.amount).toFixed(2)}</td>
+            <td>${categoryBadge}</td>
+            <td>${payment.status}</td>
+            <td>${formatDate(payment.due_date)}</td>
+            <td>
+              ${payment.status === 'Pending' 
+                ? `<button onclick="payNow(${payment.id}, ${payment.amount})">Pay Now</button>`
+                : '<button disabled>Paid</button>'}
+            </td>
+          `;
+          categoryRow.dataset.category = payment.category || 'Other';
+          categoryTableBody.appendChild(categoryRow);
+        });
+        
+        // Add message if no pending payments
+        if (pendingCount === 0) {
+          pendingTableBody.innerHTML = "<tr><td colspan='5'>No pending payments</td></tr>";
+        }
+        
+        // Add message if no completed payments
+        if (completedCount === 0) {
+          completedTableBody.innerHTML = "<tr><td colspan='4'>No completed payments</td></tr>";
+        }
+        
+        // Update category breakdown
+        updateCategoryBreakdown(payments);
+      } catch (err) {
+        console.error("Error fetching payments:", err);
+        showMessage("Failed to load payments: " + err.message, true);
+      }
+    }
+    
+    // Filter payments by category
+    function filterCategoryPayments(category) {
+      const categoryTableBody = document.getElementById("category-payments-body");
+      const buttons = document.getElementById("category-filters").getElementsByTagName("button");
+      
+      // Update active button
+      for (let i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove("active");
+        if (buttons[i].textContent === category || 
+           (buttons[i].textContent === "All" && category === "all")) {
+          buttons[i].classList.add("active");
+        }
+      }
+      
+      if (!allPaymentsData || allPaymentsData.length === 0) {
+        categoryTableBody.innerHTML = "<tr><td colspan='5'>No payments found</td></tr>";
+        return;
+      }
+      
+      // Clear table
+      categoryTableBody.innerHTML = "";
+      
+      // Filter and display payments
+      let filteredPayments = allPaymentsData;
+      if (category !== "all") {
+        filteredPayments = allPaymentsData.filter(payment => 
+          (payment.category || "Other") === category);
+      }
+      
+      if (filteredPayments.length === 0) {
+        categoryTableBody.innerHTML = `<tr><td colspan='5'>No ${category} payments found</td></tr>`;
+        return;
+      }
+      
+      filteredPayments.forEach(payment => {
+        const categoryBadge = getCategoryBadge(payment.category);
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>$${parseFloat(payment.amount).toFixed(2)}</td>
+          <td>${categoryBadge}</td>
+          <td>${payment.status}</td>
+          <td>${formatDate(payment.due_date)}</td>
+          <td>
+            ${payment.status === 'Pending' 
+              ? `<button onclick="payNow(${payment.id}, ${payment.amount})">Pay Now</button>`
+              : '<button disabled>Paid</button>'}
+          </td>
+        `;
+        categoryTableBody.appendChild(row);
+      });
+    }
+    
+    // Process payment
+    async function payNow(paymentId, amount) {
+      const userId = getUserIdFromUrl();
+      if (!userId) return;
+      
+      // Direct redirect to payment interface with amount parameter
+      window.location.href = `payments.html?amount=${amount}&paymentId=${paymentId}&userId=${userId}`;
+    }
+    
+    // Handle tab switching
+    function openTab(evt, tabName) {
+      const tabcontent = document.getElementsByClassName("tabcontent");
+      for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+      
+      const tablinks = document.getElementsByClassName("tablinks");
+      for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+      
+      document.getElementById(tabName).style.display = "block";
+      evt.currentTarget.className += " active";
+      
+      // If category tab is selected, initialize with "all" filter
+      if (tabName === "category-breakdown") {
+        filterCategoryPayments("all");
+      }
+    }
+    
+    // Load data on page load
+    window.onload = function() {
+      const userId = getUserIdFromUrl();
+      if (userId) {
+        showMessage("Loading payment data...");
+        fetchAllPayments(userId);
+        fetchPaymentStats(userId);
+      }
+    };
+  </script>
+</body>
+</html>

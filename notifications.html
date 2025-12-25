@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <style>
+        body { background-color: #f4f4f4; padding: 20px; font-family: Arial, sans-serif; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); }
+        .notification {
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #dff9fb;
+        }
+        .notification.read { background: #ecf0f1; }
+        .actions button {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .read-btn { background: #27ae60; color: white; }
+        .delete-btn { background: #e74c3c; color: white; }
+        .reply-btn { background: #3498db; color: white; }
+        .category { font-size: 12px; color: gray; }
+        select { padding: 5px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+      <h2>🔔 Notifications</h2>
+  
+      <!-- Filter Dropdown -->
+      <label for="categoryFilter">Filter by Category:</label>
+      <select id="categoryFilter" onchange="loadNotifications()">
+        <option value="all">All</option>
+        <option value="events">🎉 Events</option>
+        <option value="announcements">📢 Announcements</option>
+        <option value="help">🤝 Help & Assistance</option>
+        <option value="security">🚨 Security</option>
+        <option value="home_business">🏡 Home Business & Services</option>
+        <option value="marketplace">🏷️ Buy & Sell</option>
+        <option value="lost_found">🔍 Lost & Found</option>
+        <option value="open_discussion">💬 Open Discussion</option>
+        <option value="direct_message">📩 Direct Messages</option>
+      </select>
+  
+      <!-- Where Notifications Will Go -->
+      <div id="notifications-list"></div>
+    </div>
+    <script>
+      function timeAgo(dateString) {
+  const date = new Date(dateString);
+  const seconds = Math.floor((new Date() - date) / 1000);
+
+  let interval = Math.floor(seconds / 31536000);
+  if (interval >= 1) return interval + " year" + (interval > 1 ? "s" : "") + " ago";
+
+  interval = Math.floor(seconds / 2592000);
+  if (interval >= 1) return interval + " month" + (interval > 1 ? "s" : "") + " ago";
+
+  interval = Math.floor(seconds / 86400);
+  if (interval >= 1) return interval + " day" + (interval > 1 ? "s" : "") + " ago";
+
+  interval = Math.floor(seconds / 3600);
+  if (interval >= 1) return interval + " hour" + (interval > 1 ? "s" : "") + " ago";
+
+  interval = Math.floor(seconds / 60);
+  if (interval >= 1) return interval + " minute" + (interval > 1 ? "s" : "") + " ago";
+
+  return "Just now";
+}
+
+      // Load Notifications from Backend
+      async function loadNotifications() {
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        if (!currentUser) return;
+    
+        const categoryFilter = document.getElementById("categoryFilter")?.value || "all";
+    
+        try {
+          const res = await fetch(`http://localhost:5000/notifications/${currentUser.id}`);
+          const notifications = await res.json();
+    
+          const notifContainer = document.getElementById("notifications-list");
+          notifContainer.innerHTML = "";
+    
+          if (!notifications || notifications.length === 0) {
+            notifContainer.innerHTML = `<p>No notifications yet.</p>`;
+            return;
+          }
+    
+          notifications.forEach(notification => {
+            // Skip notification if it doesn't match the current filter
+            if (categoryFilter !== "all" && notification.category !== categoryFilter) return;
+    
+            const notifElement = document.createElement("div");
+            notifElement.classList.add("notification");
+            if (notification.read_status) notifElement.classList.add("read");
+    
+            // Message + category block
+const messageDiv = document.createElement("div");
+/*messageDiv.innerHTML = `<p><strong>${notification.message}</strong></p>
+                        <small class="category">${getCategoryLabel(notification.category)}</small>`;*/
+      messageDiv.innerHTML = `<p><strong>${notification.message}</strong></p>
+      <small class="category">${getCategoryLabel(notification.category)} • ${timeAgo(notification.created_at)}</small>`;
+
+
+// Actions (read, delete, reply)
+const actionsDiv = document.createElement("div");
+actionsDiv.classList.add("actions");
+
+// Read button
+const readBtn = document.createElement("button");
+readBtn.classList.add("read-btn");
+readBtn.innerText = "✔️ Read";
+readBtn.onclick = () => markAsRead(notification.id);
+
+// Delete button
+const deleteBtn = document.createElement("button");
+deleteBtn.classList.add("delete-btn");
+deleteBtn.innerText = "🗑 Delete";
+deleteBtn.onclick = () => deleteNotification(notification.id);
+
+// Reply button
+const replyBtn = document.createElement("button");
+replyBtn.classList.add("reply-btn");
+replyBtn.innerText = "💬 Reply";
+replyBtn.onclick = () => replyToUser(
+  notification.sender_id,
+  notification.sender_name,
+  'direct_message',
+  currentUser.id,
+  currentUser.username
+);
+
+// Append buttons
+actionsDiv.appendChild(readBtn);
+actionsDiv.appendChild(deleteBtn);
+actionsDiv.appendChild(replyBtn);
+
+// Append to notifElement
+notifElement.appendChild(messageDiv);
+notifElement.appendChild(actionsDiv);
+
+            notifContainer.appendChild(notifElement);
+          });
+    
+        } catch (error) {
+          console.error("❌ Failed to load notifications:", error);
+        }
+      }
+    
+      // Converts category key into emoji label
+      function getCategoryLabel(key) {
+        const map = {
+          events: "🎉 Events",
+          announcements: "📢 Announcements",
+          help: "🤝 Help & Assistance",
+          security: "🚨 Security",
+          home_business: "🏡 Home Business & Services",
+          marketplace: "🏷️ Buy & Sell",
+          lost_found: "🔍 Lost & Found",
+          open_discussion: "💬 Open Discussion",
+          direct_message: "📩 Direct Message",
+          comment: "💬 Comment"
+        };
+        return map[key] || key;
+      }
+    
+      function markAsRead(notifId) {
+        fetch(`http://localhost:5000/notifications/${notifId}/read`, {
+          method: "PUT"
+        }).then(() => loadNotifications());
+      }
+    
+      function deleteNotification(notifId) {
+        fetch(`http://localhost:5000/notifications/${notifId}`, {
+          method: "DELETE"
+        }).then(() => loadNotifications());
+      }
+    
+      function replyToUser(senderId, senderName, category, currentUserId, currentUsername) {
+  const replyBox = prompt(`Reply to ${senderName}:`);
+  if (!replyBox || replyBox.trim() === "") {
+    alert("Reply cannot be empty");
+    return;
+  }
+
+  fetch("http://localhost:5000/notifications/reply", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      receiver_id: senderId,
+      sender_id: currentUserId,
+      sender_name: currentUsername,
+      message: `${currentUsername} replied: ${replyBox}`,
+      category: "direct_message",
+      read_status: 0,
+    }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      alert("Reply sent!");
+      loadNotifications(); // optionally reload notifications
+    })
+    .catch((err) => {
+      console.error("Error sending reply:", err);
+      alert("Failed to send reply.");
+    });
+}
+
+
+
+
+
+      // Load on page load
+      document.addEventListener("DOMContentLoaded", loadNotifications);
+    </script>
+      
+  </body>
+  </html>

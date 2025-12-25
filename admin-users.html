@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin User Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .admin-header {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        .action-buttons button {
+            margin-right: 5px;
+        }
+        .user-card {
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .modal-header {
+            background-color: #343a40;
+            color: white;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .badge-role {
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        .card-header {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <header class="admin-header text-center">
+        <h1><i class="fas fa-users-cog"></i> User Management</h1>
+        <p class="lead">Residential Welfare Administration</p>
+    </header>
+    
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="alert alert-success" id="messageAlert" style="display: none;" role="alert">
+                    <span id="alertMessage"></span>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="fas fa-user-plus"></i> Add New User
+                </button>
+            </div>
+        </div>
+        
+        <div class="row search-container">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by username or email...">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="filterAll" checked>
+                    <label class="form-check-label" for="filterAll">All Users</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="filterResident">
+                    <label class="form-check-label" for="filterResident">Residents</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="filterAdmin">
+                    <label class="form-check-label" for="filterAdmin">Admins</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="usersList">
+            <!-- Users will be loaded here dynamically -->
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading users...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel"><i class="fas fa-user-plus"></i> Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUserForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">User Role</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="userRole" id="roleUser" value="user" checked>
+                                <label class="form-check-label" for="roleUser">
+                                    Regular User
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="userRole" id="roleAdmin" value="admin">
+                                <label class="form-check-label" for="roleAdmin">
+                                    Admin
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveNewUser">
+                        <i class="fas fa-save"></i> Save User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUserModalLabel"><i class="fas fa-user-edit"></i> Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="mb-3">
+                            <label for="editUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="editUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editPassword" class="form-label">New Password (leave blank to keep current)</label>
+                            <input type="password" class="form-control" id="editPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">User Role</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="editUserRole" id="editRoleUser" value="user">
+                                <label class="form-check-label" for="editRoleUser">
+                                    Regular User
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="editUserRole" id="editRoleAdmin" value="admin">
+                                <label class="form-check-label" for="editRoleAdmin">
+                                    Admin
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveEditedUser">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteUserModalLabel"><i class="fas fa-exclamation-triangle"></i> Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteUserId">
+                    <p>Are you sure you want to delete the user <strong id="deleteUserName"></strong>?</p>
+                    <p class="text-danger"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">
+                        <i class="fas fa-trash-alt"></i> Delete User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch and display users
+            fetchUsers();
+            
+            // Event listeners
+            document.getElementById('saveNewUser').addEventListener('click', addUser);
+            document.getElementById('saveEditedUser').addEventListener('click', updateUser);
+            document.getElementById('confirmDelete').addEventListener('click', deleteUser);
+            document.getElementById('searchButton').addEventListener('click', filterUsers);
+            document.getElementById('searchInput').addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    filterUsers();
+                }
+            });
+            
+            // Filter checkboxes
+            document.getElementById('filterAll').addEventListener('change', function() {
+                if (this.checked) {
+                    document.getElementById('filterResident').checked = false;
+                    document.getElementById('filterAdmin').checked = false;
+                    filterUsers();
+                }
+            });
+            
+            document.getElementById('filterResident').addEventListener('change', function() {
+                if (this.checked) {
+                    document.getElementById('filterAll').checked = false;
+                    filterUsers();
+                }
+            });
+            
+            document.getElementById('filterAdmin').addEventListener('change', function() {
+                if (this.checked) {
+                    document.getElementById('filterAll').checked = false;
+                    filterUsers();
+                }
+            });
+        });
+        
+        let allUsers = [];
+        
+        // Fetch users from the server
+        function fetchUsers() {
+            fetch('/admin/users')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    allUsers = data;
+                    displayUsers(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching users:', error);
+                    document.getElementById('usersList').innerHTML = `
+                        <div class="col-12 text-center">
+                            <div class="alert alert-danger">
+                                Error loading users. Please try again later.
+                            </div>
+                        </div>
+                    `;
+                });
+        }
+        
+        // Display users in the UI
+        function displayUsers(users) {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            if (users.length === 0) {
+                usersList.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <div class="alert alert-info">
+                            No users found matching your criteria.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            users.forEach(user => {
+                const userCard = document.createElement('div');
+                userCard.className = 'col-md-6 col-lg-4';
+                userCard.innerHTML = `
+                    <div class="card user-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                ${user.username}
+                                <span class="badge ${user.isAdmin ? 'bg-danger' : 'bg-success'} badge-role">
+                                    ${user.isAdmin ? 'Admin' : 'Resident'}
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text"><i class="fas fa-envelope"></i> ${user.email}</p>
+                            <p class="card-text"><i class="fas fa-id-badge"></i> ID: ${user.id}</p>
+                            <div class="action-buttons text-end">
+                                <button class="btn btn-sm btn-primary" onclick="prepareEditUser(${user.id})">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="prepareDeleteUser(${user.id}, '${user.username}')">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                usersList.appendChild(userCard);
+            });
+        }
+        
+        // Filter users based on search and filters
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterAll = document.getElementById('filterAll').checked;
+            const filterResident = document.getElementById('filterResident').checked;
+            const filterAdmin = document.getElementById('filterAdmin').checked;
+            
+            let filteredUsers = allUsers.filter(user => {
+                // Search term filter
+                const matchesSearch = user.username.toLowerCase().includes(searchTerm) || 
+                                    user.email.toLowerCase().includes(searchTerm);
+                
+                // Role filter
+                let matchesRole = true;
+                if (!filterAll) {
+                    if (filterResident && filterAdmin) {
+                        matchesRole = true; // Show both
+                    } else if (filterResident) {
+                        matchesRole = !user.isAdmin;
+                    } else if (filterAdmin) {
+                        matchesRole = user.isAdmin;
+                    } else {
+                        matchesRole = false; // No filters selected
+                    }
+                }
+                
+                return matchesSearch && matchesRole;
+            });
+            
+            displayUsers(filteredUsers);
+        }
+        
+        // Add new user
+        function addUser() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const isAdmin = document.getElementById('roleAdmin').checked;
+            
+            // Validate inputs
+            if (!username || !email || !password) {
+                showAlert('Please fill all required fields', 'danger');
+                return;
+            }
+            
+            // Prepare data for API
+            const userData = {
+                username,
+                email,
+                password,
+                isAdmin
+            };
+            
+            // Send request to server
+            fetch('/admin/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Failed to add user');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Clear form
+                document.getElementById('addUserForm').reset();
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+                modal.hide();
+                
+                // Show success message
+                showAlert('User added successfully!', 'success');
+                
+                // Refresh user list
+                fetchUsers();
+            })
+            .catch(error => {
+                console.error('Error adding user:', error);
+                showAlert(error.message, 'danger');
+            });
+        }
+        
+        // Prepare edit user modal
+        function prepareEditUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+            
+            document.getElementById('editUserId').value = user.id;
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editPassword').value = '';
+            
+            if (user.isAdmin) {
+                document.getElementById('editRoleAdmin').checked = true;
+            } else {
+                document.getElementById('editRoleUser').checked = true;
+            }
+            
+            const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            modal.show();
+        }
+        
+        // Update user
+        function updateUser() {
+            const userId = document.getElementById('editUserId').value;
+            const username = document.getElementById('editUsername').value;
+            const email = document.getElementById('editEmail').value;
+            const password = document.getElementById('editPassword').value;
+            const isAdmin = document.getElementById('editRoleAdmin').checked;
+            
+            // Validate inputs
+            if (!username || !email) {
+                showAlert('Username and email are required', 'danger');
+                return;
+            }
+            
+            // Prepare data for API
+            const userData = {
+                username,
+                email,
+                isAdmin
+            };
+            
+            // Add password only if it was entered
+            if (password) {
+                userData.password = password;
+            }
+            
+            // Send request to server
+            fetch(`/admin/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Failed to update user');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+                modal.hide();
+                
+                // Show success message
+                showAlert('User updated successfully!', 'success');
+                
+                // Refresh user list
+                fetchUsers();
+            })
+            .catch(error => {
+                console.error('Error updating user:', error);
+                showAlert(error.message, 'danger');
+            });
+        }
+        
+        // Prepare delete user modal
+        function prepareDeleteUser(userId, username) {
+            document.getElementById('deleteUserId').value = userId;
+            document.getElementById('deleteUserName').textContent = username;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+            modal.show();
+        }
+        
+        // Delete user
+        function deleteUser() {
+            const userId = document.getElementById('deleteUserId').value;
+            
+            // Send delete request to server
+            fetch(`/admin/users/${userId}`, {
+                method: 'DELETE',
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Failed to delete user');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteUserModal'));
+                modal.hide();
+                
+                // Show success message
+                showAlert('User deleted successfully!', 'success');
+                
+                // Refresh user list
+                fetchUsers();
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+                showAlert(error.message, 'danger');
+            });
+        }
+        
+        // Show alert messages
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('messageAlert');
+            const alertMessage = document.getElementById('alertMessage');
+            
+            alertMessage.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

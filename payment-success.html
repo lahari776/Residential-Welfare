@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .success-container {
+            max-width: 400px;
+            width: 90%;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            text-align: center;
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px;
+        }
+        .checkmark {
+            color: white;
+            font-size: 50px;
+            line-height: 1;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .amount {
+            font-size: 32px;
+            color: #333;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .transaction-details {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .transaction-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .label {
+            color: #666;
+            font-size: 14px;
+        }
+        .value {
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 0;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .status-message {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+    <script>
+        // Function to get URL parameters
+        function getUrlParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Function to update payment in database
+        async function updatePaymentStatus() {
+            const payment_id = getUrlParam('payment_id') || localStorage.getItem('currentPaymentId');
+            const user_id = getUrlParam('user_id') || localStorage.getItem('userId');
+            const amount = getUrlParam('amount');
+            
+            // Log the parameters for debugging
+            console.log("Payment processing attempt:", {
+                payment_id: payment_id,
+                user_id: user_id,
+                amount: amount
+            });
+            
+            if (!payment_id || !user_id || !amount) {
+                console.error("Missing required parameters for payment update");
+                document.getElementById("statusMessage").innerText = "Error: Missing payment information";
+                document.getElementById("statusMessage").className = "status-message error-message";
+                document.getElementById("statusMessage").style.display = "block";
+                return;
+            }
+            
+            try {
+                const response = await fetch('/user/payments/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        payment_id: payment_id,
+                        user_id: user_id,
+                        amount: parseFloat(amount)
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log("Payment updated successfully:", result);
+                    document.getElementById("statusMessage").innerText = "Payment updated successfully in records!";
+                    document.getElementById("statusMessage").className = "status-message success-message";
+                    document.getElementById("statusMessage").style.display = "block";
+                } else {
+                    console.error("Error updating payment:", result.error);
+                    document.getElementById("statusMessage").innerText = "Note: Payment received but not updated in records. Please contact support.";
+                    document.getElementById("statusMessage").className = "status-message error-message";
+                    document.getElementById("statusMessage").style.display = "block";
+                }
+            } catch (error) {
+                console.error("Failed to update payment status:", error);
+                document.getElementById("statusMessage").innerText = "Note: Payment received but not updated in records. Please contact support.";
+                document.getElementById("statusMessage").className = "status-message error-message";
+                document.getElementById("statusMessage").style.display = "block";
+            }
+        }
+
+        window.onload = function() {
+            const amount = getUrlParam('amount');
+            document.getElementById("amountDisplay").innerText = "₹" + (amount || '0');
+            
+            const method = getUrlParam('method');
+            document.getElementById("paymentMethod").innerText = 
+                method === 'card' ? 'Credit/Debit Card' : 
+                method === 'netbanking' ? 'Net Banking' : 
+                method === 'qr' ? 'QR Code' : 'UPI';
+            
+            // Get payment_id and user_id from URL or localStorage
+            const payment_id = getUrlParam('payment_id') || localStorage.getItem('currentPaymentId');
+            const user_id = getUrlParam('user_id') || localStorage.getItem('userId');
+            
+            // Log for debugging
+            console.log("Success page IDs:", {
+                payment_id: payment_id,
+                user_id: user_id
+            });
+            
+            // Generate a random transaction ID
+            const transId = "TXN" + Math.floor(Math.random() * 1000000000);
+            document.getElementById("transactionId").innerText = transId;
+            
+            // Get current date and time
+            const now = new Date();
+            const date = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const time = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById("timestamp").innerText = date + ", " + time;
+            
+            // Update payment status in database
+            updatePaymentStatus();
+        };
+        
+        function goHome() {
+            window.location.href = "user-home.html";
+        }
+    </script>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">
+            <span class="checkmark">✓</span>
+        </div>
+        <h1>Payment Successful</h1>
+        <div class="amount" id="amountDisplay">₹0</div>
+        <div class="timestamp" id="timestamp">01 Apr 2025, 10:30 AM</div>
+        
+        <div class="transaction-details">
+            <div class="transaction-row">
+                <span class="label">Transaction ID</span>
+                <span class="value" id="transactionId">TXN123456789</span>
+            </div>
+            <div class="transaction-row">
+                <span class="label">Payment Method</span>
+                <span class="value" id="paymentMethod">UPI</span>
+            </div>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <button class="button" onclick="goHome()">Done</button>
+    </div>
+</body>
+</html>

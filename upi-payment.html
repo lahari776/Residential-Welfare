@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPI Payment</title>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .payment-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-evenly;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .payment-details {
+            margin-bottom: 20px;
+        }
+
+        .upi-id-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .qr-code img {
+            width: 300px;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 20px 0;
+        }
+    </style>
+    <script>
+        // Function to get URL parameters
+        function getUrlParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+        
+        // Get current payment and user IDs
+        let currentPaymentId;
+        let currentUserId;
+        
+        window.onload = function() {
+            const amount = getUrlParam('amount');
+            document.getElementById("amountDisplay").innerText = "Amount to Pay: ₹" + (amount || '0');
+            
+            // Get payment ID and user ID from URL parameters
+            currentPaymentId = getUrlParam('payment_id');
+            currentUserId = getUrlParam('user_id');
+            
+            // If not in URL, try to get from localStorage
+            if (!currentPaymentId) {
+                currentPaymentId = localStorage.getItem('currentPaymentId');
+            }
+            
+            if (!currentUserId) {
+                currentUserId = localStorage.getItem('userId');
+            }
+            
+            // Log for debugging
+            console.log("Payment ID:", currentPaymentId);
+            console.log("User ID:", currentUserId);
+
+            const tabs = document.querySelectorAll('.tab');
+            const sections = {
+                'upi-id-section': document.getElementById('upi-id-section'),
+                'qr-section': document.getElementById('qr-section')
+            };
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    Object.keys(sections).forEach(key => sections[key].style.display = 'none');
+                    sections[tab.getAttribute('data-target')].style.display = 'block';
+                });
+            });
+        };
+        
+        function processPayment(event) {
+            event.preventDefault();
+            
+            // Get the amount from URL parameters
+            const amount = getUrlParam('amount');
+            
+            // Log values to help with debugging
+            console.log("Processing UPI payment with:", {
+                paymentId: currentPaymentId,
+                userId: currentUserId,
+                amount: amount,
+                upiId: document.getElementById('upi-id').value
+            });
+            
+            // Redirect to success page with all required parameters
+            window.location.href = "payment-success.html?payment_id=" + encodeURIComponent(currentPaymentId) + 
+                      "&user_id=" + encodeURIComponent(currentUserId) + 
+                      "&amount=" + encodeURIComponent(amount) + 
+                      "&method=upi";
+        }
+        
+        function processQRPayment() {
+            // Get the amount from URL parameters
+            const amount = getUrlParam('amount');
+            
+            // Log values to help with debugging
+            console.log("Processing QR payment with:", {
+                paymentId: currentPaymentId,
+                userId: currentUserId,
+                amount: amount
+            });
+            
+            // Redirect to success page with all required parameters
+            window.location.href = "payment-success.html?payment_id=" + encodeURIComponent(currentPaymentId) + 
+                      "&user_id=" + encodeURIComponent(currentUserId) + 
+                      "&amount=" + encodeURIComponent(amount) + 
+                      "&method=qr";
+        }
+    </script>
+</head>
+<body>
+    <div class="payment-container">
+        <h2>UPI Payment</h2>
+        <div class="amount-display" id="amountDisplay"></div>
+        <div class="tabs">
+            <div class="tab active" data-target="upi-id-section">UPI ID</div>
+            <div class="tab" data-target="qr-section">QR Code</div>
+        </div>
+
+        <div class="payment-details" id="upi-id-section">
+            <div class="upi-id-container">
+                <label for="upi-id">Enter Your UPI ID:</label>
+                <input type="text" id="upi-id" name="upi-id" placeholder="example@upi" required>
+            </div>
+            <p style="font-size: 14px; color: #333;">Pay directly using your UPI ID</p>
+            <button type="submit" onclick="processPayment(event)">Pay</button>
+        </div>
+
+        <div class="payment-details" id="qr-section" style="display: none;">
+            <div class="qr-code">
+                <img src="qr.png" alt="UPI QR Code">
+            </div>
+            <p style="font-size: 14px; color: #333;">Scan the QR code using any UPI app to complete your payment</p>
+            <button type="button" onclick="procesfsQRPayment()">Payment Complete</button>
+        </div>
+    </div>
+</body>
+</html>

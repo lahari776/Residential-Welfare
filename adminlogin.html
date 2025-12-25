@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Signup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { background-color: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .container { width: 350px; padding: 20px; background: white; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px; text-align: center; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        .btn { width: 100%; padding: 10px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #218c53; }
+        .toggle-link { margin-top: 10px; display: block; color: #3498db; cursor: pointer; }
+        .toggle-link:hover { text-decoration: underline; }
+        .error { color: red; font-size: 14px; margin-top: 5px; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loginForm">
+            <h2>Admin Login</h2>
+            <input type="email" id="loginEmail" placeholder="Enter Email">
+            <input type="password" id="loginPassword" placeholder="Enter Password">
+            <p id="loginError" class="error"></p>
+            <button class="btn" onclick="login()">Login</button>
+            <p class="toggle-link" onclick="toggleForm()">Don't have an account? Sign up</p>
+        </div>
+
+        <div id="signupForm" style="display: none;">
+            <h2>Sign Up</h2>
+            <input type="text" id="signupUsername" placeholder="Enter Username">
+            <input type="email" id="signupEmail" placeholder="Enter Email">
+            <input type="password" id="signupPassword" placeholder="Enter Password">
+            <input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
+            <p id="signupError" class="error"></p>
+            <button class="btn" onclick="signup()">Sign Up</button>
+            <p class="toggle-link" onclick="toggleForm()">Already have an account? Login</p>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            document.getElementById("loginForm").style.display =
+                document.getElementById("loginForm").style.display === "none" ? "block" : "none";
+            document.getElementById("signupForm").style.display =
+                document.getElementById("signupForm").style.display === "none" ? "block" : "none";
+        }
+
+        function signup() {
+            const username = document.getElementById("signupUsername").value;
+            const email = document.getElementById("signupEmail").value;
+            const password = document.getElementById("signupPassword").value;
+            const confirmPassword = document.getElementById("signupConfirmPassword").value;
+            const error = document.getElementById("signupError");
+
+            error.textContent = "";
+
+            if (!username || !email || !password || !confirmPassword) {
+                error.textContent = "Please fill in all fields.";
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                error.textContent = "Passwords do not match.";
+                return;
+            }
+
+            fetch("http://localhost:5000/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert("Signup successful! You can now log in.");
+                    toggleForm();
+                } else {
+                    error.textContent = data.error;
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function login() {
+    const email = document.getElementById("loginEmail").value;
+    const password = document.getElementById("loginPassword").value;
+
+    fetch("http://localhost:5000/adminlogin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.user) {
+            localStorage.setItem("currentUser", JSON.stringify(data.user)); // ✅ Updates with new user
+            localStorage.setItem("userId", data.user.id); // 🔥 Add this line
+
+            console.log("✅ Logged in user:", data.user); // Debugging Log
+            ///
+            //window.location.href = 'p3.html'; 
+            window.location.href = "adminhome1.html"; // ✅ Redirects to Community Page
+        } else {
+            alert("Invalid email or password.");
+        }
+    })
+    .catch(error => console.error("❌ Login error:", error));
+}
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Payment Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            background-color: #f9fafb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .summary-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .status-pending {
+            color: var(--warning-color);
+        }
+
+        .status-completed {
+            color: var(--success-color);
+        }
+
+        .status-failed {
+            color: var(--danger-color);
+        }
+
+        .payment-card {
+            border-left: 4px solid #ddd;
+            transition: all 0.2s ease;
+        }
+
+        .payment-card.pending {
+            border-left-color: var(--warning-color);
+        }
+
+        .payment-card.completed {
+            border-left-color: var(--success-color);
+        }
+
+        .payment-card.failed {
+            border-left-color: var(--danger-color);
+        }
+
+        .payment-card.overdue {
+            border-left-color: var(--danger-color);
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+        }
+
+        #logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #ddd;
+            border-bottom-color: var(--primary-color);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="mb-4">Payment Dashboard</h1>
+                <div class="row" id="summary-cards">
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Pending</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-pending" id="pending-count">3</h2>
+                                    <i class="fas fa-clock fa-2x status-pending"></i>
+                                </div>
+                                <p class="card-text" id="pending-amount">$225.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Completed</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-completed" id="completed-count">5</h2>
+                                    <i class="fas fa-check-circle fa-2x status-completed"></i>
+                                </div>
+                                <p class="card-text" id="completed-amount">$450.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Failed</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-failed" id="failed-count">1</h2>
+                                    <i class="fas fa-times-circle fa-2x status-failed"></i>
+                                </div>
+                                <p class="card-text" id="failed-amount">$50.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="summary-card card bg-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Overdue Payments</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="status-failed" id="overdue-count">2</h2>
+                                    <i class="fas fa-exclamation-triangle fa-2x status-failed"></i>
+                                </div>
+                                <p class="card-text" id="overdue-amount">$125.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Payments Management</h5>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                            <i class="fas fa-plus me-1"></i> Add Payment
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Due Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="payment-card pending">
+                                        <td>1</td>
+                                        <td>John Doe</td>
+                                        <td>Water Bill</td>
+                                        <td>$75.00</td>
+                                        <td><span class="badge bg-warning">Pending</span></td>
+                                        <td>2025-04-25</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success">Mark Completed</button>
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="payment-card completed">
+                                        <td>2</td>
+                                        <td>Jane Smith</td>
+                                        <td>Maintenance</td>
+                                        <td>$150.00</td>
+                                        <td><span class="badge bg-success">Completed</span></td>
+                                        <td>2025-04-10</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="payment-card overdue">
+                                        <td>3</td>
+                                        <td>Bob Johnson</td>
+                                        <td>Security Fee</td>
+                                        <td>$100.00</td>
+                                        <td><span class="badge bg-danger">Overdue</span></td>
+                                        <td>2025-04-01</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success">Mark Completed</button>
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="admin-payments.js"></script>
+</body>
+</html>
